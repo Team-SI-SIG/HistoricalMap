@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#! /usr/bin/python3
+
 """
 /***************************************************************************
  HistoricalMap
@@ -21,10 +22,11 @@
  ***************************************************************************/
  This script initializes the plugin, making it known to QGIS.
 """
+from __future__ import annotations
 
 
 # noinspection PyPep8Naming
-def classFactory(iface):  # pylint: disable=invalid-name
+def classFactory(iface: QgsInterface) -> HistoricalMap:
     """Load HistoricalMap class from file HistoricalMap.
 
     :param iface: A QGIS interface instance.
@@ -32,4 +34,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
     #
     from .historical_map import HistoricalMap
+
     return HistoricalMap(iface)
