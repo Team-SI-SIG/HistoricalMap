@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 """!@brief Interface between qgisForm and function_historical_map.py
 ./***************************************************************************
  HistoricalMap
@@ -19,22 +21,24 @@
  *                                                                         *
  ***************************************************************************/
 """
-# -*- coding: utf-8 -*-
-from PyQt4 import QtGui
-from PyQt4.QtGui import QAction, QIcon, QFileDialog, QDialog
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from __future__ import annotations
+
 import os.path
+
 import function_historical_map as fhm
+
 # Initialize Qt resources from file resources.py
-#import resources
+# import resources
 # Import the code for the dialog
 from historical_map_dialog import HistoricalMapDialog
-
-
+from PyQt5 import QtGui
 from qgis.core import QgsMessageLog
+from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTranslator, qVersion
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QDialog, QFileDialog, QMessageBox
 
 
-class HistoricalMap( QDialog ):
+class HistoricalMap(QDialog):
     """!@brief QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -44,42 +48,40 @@ class HistoricalMap( QDialog ):
             which provides the hook by which you can manipulate the QGIS
             application at run time.
         type iface: QgsInterface
-        
+
         declare all fields to fill, such as output raster, columns to find from a shp...
         """
-        QDialog.__init__(self)
+        super(HistoricalMap, self).__init__(parent=None)
         sender = self.sender()
         """
-        """# Save reference to the QGIS interface
+        """  # Save reference to the QGIS interface
         self.iface = iface
         legendInterface = self.iface.legendInterface()
-        
+
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        locale = QSettings().value("locale/userLocale")[0:2]
         locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'HistoricalMap_{}.qm'.format(locale))
+            self.plugin_dir, "i18n", "HistoricalMap_{}.qm".format(locale)
+        )
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
 
-            if qVersion() > '4.3.3':
+            if qVersion() > "4.3.3":
                 QCoreApplication.installTranslator(self.translator)
-                        
+
         # Create the dialog (after translation) and keep reference
         self.dlg = HistoricalMapDialog()
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&Historical Map')
+        self.menu = self.tr("&Historical Map")
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'HistoricalMap')
-        self.toolbar.setObjectName(u'HistoricalMap')
-        
-        
+        self.toolbar = self.iface.addToolBar("HistoricalMap")
+        self.toolbar.setObjectName("HistoricalMap")
+
         ## Init to choose file (to load or to save)
         self.dlg.outRaster.clear()
         self.dlg.selectRaster.clicked.connect(self.select_output_file)
@@ -87,7 +89,7 @@ class HistoricalMap( QDialog ):
         self.dlg.selectModel.clicked.connect(self.select_output_file)
         self.dlg.outMatrix.clear()
         self.dlg.selectMatrix.clicked.connect(self.select_output_file)
-            
+
         self.dlg.btnFilter.clicked.connect(self.runFilter)
         self.dlg.btnTrain.clicked.connect(self.runTrain)
         self.dlg.btnClassify.clicked.connect(self.runClassify)
@@ -95,26 +97,28 @@ class HistoricalMap( QDialog ):
         self.dlg.selectModelStep3.clicked.connect(self.select_load_file)
         self.dlg.outShp.clear()
         self.dlg.selectOutShp.clicked.connect(self.select_output_file)
-        
 
-        ## init fields   
+        ## init fields
 
         self.dlg.inTraining.currentIndexChanged[int].connect(self.onChangedLayer)
-        
+
         ## By default field list is empty, so we fill with current layer
         ## if no currentLayer, no filling, or it will crash Qgis
         self.dlg.inField.clear()
-        if self.dlg.inField.currentText() == '' and self.dlg.inTraining.currentLayer() and self.dlg.inTraining.currentLayer()!='NoneType':
+        if (
+            self.dlg.inField.currentText() == ""
+            and self.dlg.inTraining.currentLayer()
+            and self.dlg.inTraining.currentLayer() != "NoneType"
+        ):
             activeLayer = self.dlg.inTraining.currentLayer()
             provider = activeLayer.dataProvider()
             fields = provider.fields()
             listFieldNames = [field.name() for field in fields]
             self.dlg.inField.addItems(listFieldNames)
-            
 
-        
         ## hide/show nfolds spinbox
         self.dlg.nFolds.hide()
+
     """ uncomment for nfold support
     self.dlg.inClassifier.currentIndexChanged[int].connect(self.nfolds)
         
@@ -123,23 +127,25 @@ class HistoricalMap( QDialog ):
         if self.dlg.inClassifier.currentText() == "GMM":
             self.dlg.nFolds.hide()
         else :
-            self.dlg.nFolds.show()         
+            self.dlg.nFolds.show()
     """
-        
-    def onChangedLayer(self,index):
+
+    def onChangedLayer(self, index):
         """!@brief If active layer is changed, change column combobox"""
         # We clear combobox
         self.dlg.inField.clear()
         # Then we fill it with new selected Layer
-        if self.dlg.inField.currentText() == '' and self.dlg.inTraining.currentLayer() and self.dlg.inTraining.currentLayer()!='NoneType':
+        if (
+            self.dlg.inField.currentText() == ""
+            and self.dlg.inTraining.currentLayer()
+            and self.dlg.inTraining.currentLayer() != "NoneType"
+        ):
             activeLayer = self.dlg.inTraining.currentLayer()
             provider = activeLayer.dataProvider()
             fields = provider.fields()
             listFieldNames = [field.name() for field in fields]
             self.dlg.inField.addItems(listFieldNames)
-        
-        
-        
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """!@brief Get the translation for a string using Qt translation API.
@@ -153,8 +159,7 @@ class HistoricalMap( QDialog ):
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('HistoricalMap', message)
-
+        return QCoreApplication.translate("HistoricalMap", message)
 
     def add_action(
         self,
@@ -166,7 +171,8 @@ class HistoricalMap( QDialog ):
         add_to_toolbar=True,
         status_tip=None,
         whats_this=None,
-        parent=None):
+        parent=None,
+    ):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -221,9 +227,7 @@ class HistoricalMap( QDialog ):
             self.toolbar.addAction(action)
 
         if add_to_menu:
-            self.iface.addPluginToRasterMenu(
-                self.menu,
-                action)
+            self.iface.addPluginToRasterMenu(self.menu, action)
 
         self.actions.append(action)
 
@@ -232,89 +236,93 @@ class HistoricalMap( QDialog ):
     def initGui(self):
         """!@brief Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/HistoricalMap/img/icon.png'
+        icon_path = ":/plugins/HistoricalMap/img/icon.png"
         self.add_action(
             icon_path,
-            text=self.tr(u'Select historical map'),
+            text=self.tr("Select historical map"),
             callback=self.showDlg,
-            parent=self.iface.mainWindow())
-
+            parent=self.iface.mainWindow(),
+        )
 
     def unload(self):
         """!@brief Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginRasterMenu(
-                self.tr(u'&Historical Map'),
-                action)
+            self.iface.removePluginRasterMenu(self.tr("&Historical Map"), action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-        
+
     def select_output_file(self):
         """!@brief Select file to save, and gives the right extension if the user don't put it"""
         sender = self.sender()
 
         fileName = QFileDialog.getSaveFileName(self.dlg, "Select output file")
-        
+
         if not fileName:
             return
-            
+
         # If user give right file extension, we don't add it
-            
-        fileName,fileExtension=os.path.splitext(fileName)
-        if sender == self.dlg.selectRaster: 
-            if fileExtension!='.tif':
-                self.dlg.outRaster.setText(fileName+'.tif')
+
+        fileName, fileExtension = os.path.splitext(fileName)
+        if sender == self.dlg.selectRaster:
+            if fileExtension != ".tif":
+                self.dlg.outRaster.setText(fileName + ".tif")
             else:
-                self.dlg.outRaster.setText(fileName+fileExtension)
-        elif sender == self.dlg.selectModel: 
-            self.dlg.outModel.setText(fileName+fileExtension)            
-        elif sender == self.dlg.selectMatrix: 
-            if fileExtension!='.csv':
-                self.dlg.outMatrix.setText(fileName+'.csv')
+                self.dlg.outRaster.setText(fileName + fileExtension)
+        elif sender == self.dlg.selectModel:
+            self.dlg.outModel.setText(fileName + fileExtension)
+        elif sender == self.dlg.selectMatrix:
+            if fileExtension != ".csv":
+                self.dlg.outMatrix.setText(fileName + ".csv")
             else:
-                self.dlg.outMatrix.setText(fileName+fileExtension)
+                self.dlg.outMatrix.setText(fileName + fileExtension)
         elif sender == self.dlg.selectOutShp:
-            if fileExtension!='.shp':
-                self.dlg.outShp.setText(fileName+'.shp')
+            if fileExtension != ".shp":
+                self.dlg.outShp.setText(fileName + ".shp")
             else:
-                self.dlg.outShp.setText(fileName+fileExtension)
+                self.dlg.outShp.setText(fileName + fileExtension)
         elif sender == self.dlg.selectModelStep3:
             self.dlg.inModel.setText(fileName)
-     
+
     def select_load_file(self):
         """!@brief Select file to load in the field"""
-        sender=self.sender()
-        fileName = QFileDialog.getOpenFileName(self.dlg, "Select your file","")
+        sender = self.sender()
+        fileName = QFileDialog.getOpenFileName(self.dlg, "Select your file", "")
         if not fileName:
             return
         if sender == self.dlg.selectModelStep3:
             self.dlg.inModel.setText(fileName)
+
     def showDlg(self):
         self.dlg.show()
-        
+
     def runFilter(self):
         """!@brief Performs the filtering of the map by calling function_historical_map.py
-        
+
         First step is validating the form, then if all is ok, proceed to the filtering.
         """
-        message=''
+        message = ""
         try:
-            inRaster=self.dlg.inRaster.currentLayer()
-            inRaster=inRaster.dataProvider().dataSourceUri()
-            rasterName,rasterExt=os.path.splitext(inRaster)
-            if not rasterExt == '.tif' or rasterExt == '.tiff':
-                message = "You have to specify a tif in image to filter. You tried to had a "+rasterExt
-             
+            inRaster = self.dlg.inRaster.currentLayer()
+            inRaster = inRaster.dataProvider().dataSourceUri()
+            rasterName, rasterExt = os.path.splitext(inRaster)
+            if not rasterExt == ".tif" or rasterExt == ".tiff":
+                message = (
+                    "You have to specify a tif in image to filter. You tried to had a "
+                    + rasterExt
+                )
+
         except:
-            message="Impossible to load raster"
-        if self.dlg.outRaster.text()=='':
+            message = "Impossible to load raster"
+        if self.dlg.outRaster.text() == "":
             message = "Sorry, you have to specify as output raster"
 
-        if message!='':
-            QtGui.QMessageBox.warning(self, 'Information missing or invalid', message, QtGui.QMessageBox.Ok)
-            
-        else:  
+        if message != "":
+            QMessageBox.warning(
+                self, "Information missing or invalid", message, QMessageBox.Ok
+            )
+
+        else:
             """
             PROCESS IF ALL OK
             """
@@ -322,137 +330,161 @@ class HistoricalMap( QDialog ):
                 # Get args
                 # inRaster=self.dlg.inRaster.currentLayer()
                 # inRaster=inRaster.dataProvider().dataSourceUri()
-                inShapeGrey=self.dlg.inShapeGrey.value()
-                inShapeMedian=self.dlg.inShapeMedian.value()
-                outRaster=self.dlg.outRaster.text()
-                iterMedian=self.dlg.inShapeMedianIter.value()
-                
+                inShapeGrey = self.dlg.inShapeGrey.value()
+                inShapeMedian = self.dlg.inShapeMedian.value()
+                outRaster = self.dlg.outRaster.text()
+                iterMedian = self.dlg.inShapeMedianIter.value()
+
                 # Do the job
-                
-                fhm.historicalFilter(inRaster,outRaster,inShapeGrey,inShapeMedian,iterMedian)
-    
+
+                fhm.historicalFilter(
+                    inRaster, outRaster, inShapeGrey, inShapeMedian, iterMedian
+                )
+
                 # Show what's done
-                self.iface.messageBar().pushMessage("New image", "Filter with "+str(inShapeGrey)+' closing size and '+str(inShapeMedian)+ ' median size', 3, 10)
+                self.iface.messageBar().pushMessage(
+                    "New image",
+                    "Filter with "
+                    + str(inShapeGrey)
+                    + " closing size and "
+                    + str(inShapeMedian)
+                    + " median size",
+                    3,
+                    10,
+                )
                 self.iface.addRasterLayer(outRaster)
             except:
-                QtGui.QMessageBox.warning(self, 'Problem while filtering', 'Please show log', QtGui.QMessageBox.Ok)
-
-                
+                QMessageBox.warning(
+                    self, "Problem while filtering", "Please show log", QMessageBox.Ok
+                )
 
     def runTrain(self):
         """!@brief Performs the training by calling function_historical_map.py
-                
+
         First step is validating the form, then if all is ok, proceed to the training.
         Tell the user who don't have sklearn they can't use classifier except GMM.
-        
+
             Input :
                 Fields from the form
             Output :
                 Open a popup to show where the matrix or the model is saved
         """
         # Validation
-        message=''
-        if self.dlg.outModel.text()=='':
+        message = ""
+        if self.dlg.outModel.text() == "":
             message = "Sorry, you have to specify as model name"
-        if self.dlg.outMatrix.text()=='':
+        if self.dlg.outMatrix.text() == "":
             message = "Sorry, you have to specify as matrix name"
-        if not self.dlg.inClassifier.currentText()=='GMM':
+        if not self.dlg.inClassifier.currentText() == "GMM":
             try:
                 import sklearn
             except:
-                message = "It seems you don't have Scitkit-Learn on your computer. You can only use GMM classifier. Please consult the documentation for more information"
-             
-        if message != '':
-            QtGui.QMessageBox.warning(self, 'Information missing or invalid', message, QtGui.QMessageBox.Ok)
-   
+                message = (
+                    "It seems you don't have Scitkit-Learn on your computer."
+                    " You can only use GMM classifier."
+                    " Please consult the documentation for more information"
+                )
+
+        if message != "":
+            QMessageBox.warning(
+                self, "Information missing or invalid", message, QMessageBox.Ok
+            )
         else:
             try:
-                
-                # Getting variables from UI            
-                inFiltered=self.dlg.inFiltered.currentLayer()
-                inFiltered=inFiltered.dataProvider().dataSourceUri()
-                inTraining=self.dlg.inTraining.currentLayer()
-                
+                # Getting variables from UI
+                inFiltered = self.dlg.inFiltered.currentLayer()
+                inFiltered = inFiltered.dataProvider().dataSourceUri()
+                inTraining = self.dlg.inTraining.currentLayer()
                 # Remove layerid=0 from SHP Path
-                inTraining=inTraining.dataProvider().dataSourceUri().split('|')[0]
-                
-                
-                inClassifier=self.dlg.inClassifier.currentText()
-                outModel=self.dlg.outModel.text()
-                outMatrix=self.dlg.outMatrix.text()
-                
-                #> Optional inField
-                inField=self.dlg.inField.currentText()            
-                inSeed=self.dlg.inSeed.value()
-                inSeed=int(inSeed)
-                inSplit=self.dlg.inSplit.value()
-                #nFolds=self.dlg.nFolds.value()
+                inTraining = inTraining.dataProvider().dataSourceUri().split("|")[0]
+                inClassifier = self.dlg.inClassifier.currentText()
+                outModel = self.dlg.outModel.text()
+                outMatrix = self.dlg.outMatrix.text()
+                # > Optional inField
+                inField = self.dlg.inField.currentText()
+                inSeed = self.dlg.inSeed.value()
+                inSeed = int(inSeed)
+                inSplit = self.dlg.inSplit.value()
+                # nFolds=self.dlg.nFolds.value()
                 # add model to step 3
                 self.dlg.inModel.setText(outModel)
                 # Do the job
-                fhm.learnModel(inFiltered,inTraining,inField,inSplit,inSeed,outModel,outMatrix,inClassifier)
-                
+                fhm.learnModel(
+                    inFiltered,
+                    inTraining,
+                    inField,
+                    inSplit,
+                    inSeed,
+                    outModel,
+                    outMatrix,
+                    inClassifier,
+                )
+
                 # show where it is saved
-                if self.dlg.outMatrix.text()!='':
-                    QtGui.QMessageBox.information(self, "Information", "Training is done!<br>Confusion matrix saved at "+str(outMatrix)+".")         
+                if self.dlg.outMatrix.text() != "":
+                    QMessageBox.information(
+                        self,
+                        "Information",
+                        f"Training is done!<br>Confusion matrix saved at {outMatrix}.",
+                    )
                 else:
-                    QtGui.QMessageBox.information(self, "Information", "Model is done!<br>Model saved at "+str(outModel)+", and matrix at"+str(outMatrix)+".")
+                    QMessageBox.information(
+                        self,
+                        "Information",
+                        f"Model is done!<br>Model saved at {outModel}, and matrix at {outMatrix}.",
+                    )
             except:
-                QtGui.QMessageBox.warning(self, 'Problem while training', 'Something went wrong, sorry. Please report this issue with four files and settings.', QtGui.QMessageBox.Ok)
+                QMessageBox.warning(
+                    self,
+                    "Problem while training",
+                    "Something went wrong, sorry. Please report this issue with four files and settings.",
+                    QMessageBox.Ok,
+                )
 
-
-            
     def runClassify(self):
-            """!@brief Performs the classification by calling function_historical_map.py
-            Method that performs the classification
-            
-            First step is validating the form, then if all is ok, proceed to the classification.
-            """
-            message=''
-            if self.dlg.inModel.text()=='':
-                message = "Sorry, you have to specify a model"
-            if self.dlg.outShp.text()=='':
-                message = "Sorry, you have to specify a vector field to save the results"
-            if not os.path.splitext(self.dlg.outShp.text())[1]=='.shp':
-                message = "Sorry, you have to specify a *.shp type in output"
-            if message != '':
-                QtGui.QMessageBox.warning(self, 'Information missing or invalid', message, QtGui.QMessageBox.Ok)
-                
-            else:
-                                
-                # Get filtered image                
-                inFilteredStep3=self.dlg.inFilteredStep3.currentLayer()
-                inFilteredStep3=str(inFilteredStep3.dataProvider().dataSourceUri())
-                
-                # Get model done at Step 2
-                inModel=str(self.dlg.inModel.text())
-                
-                # Get min size for polygons
-                # Multipied by 10 000 to have figure in hectare
-                # Input of 0,6 (0,6 hectare) will be converted to 6000 m2
-                
-                inMinSize=self.dlg.inMinSize.value()
-                
-                outShp=str(self.dlg.outShp.text())
-                inClassForest=int(self.dlg.inClassForest.value())
-                
-                # do the job
-            
-                classify=fhm.classifyImage()
-                inMinSize = inMinSize*10000 # convert ha to m squared
-                
-                try:
-                    temp=classify.initPredict(inFilteredStep3,inModel)
-                except:
-                    QgsMessageLog.logMessage("Problem while predicting image")
-                    
-                
-        
-                if self.dlg.filterByPixel.isChecked():  # sieve by pixel number (raster)
-                    temp=classify.postClassRaster(temp,int(inMinSize),inClassForest,outShp)
-                else :                                  # sieve by area (vector)
-                    temp=classify.postClassVector(temp,inMinSize,inClassForest,outShp)
-                
-                # Add layer
-                self.iface.addVectorLayer(outShp,'Vectorized class','ogr')
-                self.iface.messageBar().pushMessage("New vector : ",outShp, 3, duration=10)
+        """!@brief Performs the classification by calling function_historical_map.py
+        Method that performs the classification
+
+        First step is validating the form, then if all is ok, proceed to the classification.
+        """
+        message = ""
+        if self.dlg.inModel.text() == "":
+            message = "Sorry, you have to specify a model"
+        if self.dlg.outShp.text() == "":
+            message = "Sorry, you have to specify a vector field to save the results"
+        if not os.path.splitext(self.dlg.outShp.text())[1] == ".shp":
+            message = "Sorry, you have to specify a *.shp type in output"
+        if message != "":
+            QMessageBox.warning(
+                self, "Information missing or invalid", message, QMessageBox.Ok
+            )
+        else:
+            # Get filtered image
+            inFilteredStep3 = self.dlg.inFilteredStep3.currentLayer()
+            inFilteredStep3 = str(inFilteredStep3.dataProvider().dataSourceUri())
+            # Get model done at Step 2
+            inModel = str(self.dlg.inModel.text())
+            # Get min size for polygons
+            # Multipied by 10 000 to have figure in hectare
+            # Input of 0,6 (0,6 hectare) will be converted to 6000 m2
+            inMinSize = self.dlg.inMinSize.value()
+            outShp = str(self.dlg.outShp.text())
+            inClassForest = int(self.dlg.inClassForest.value())
+            # do the job
+            classify = fhm.classifyImage()
+            inMinSize = inMinSize * 10000  # convert ha to m squared
+            try:
+                temp = classify.initPredict(inFilteredStep3, inModel)
+            except:
+                QgsMessageLog.logMessage("Problem while predicting image")
+
+            if self.dlg.filterByPixel.isChecked():  # sieve by pixel number (raster)
+                temp = classify.postClassRaster(
+                    temp, int(inMinSize), inClassForest, outShp
+                )
+            else:  # sieve by area (vector)
+                temp = classify.postClassVector(temp, inMinSize, inClassForest, outShp)
+
+            # Add layer
+            self.iface.addVectorLayer(outShp, "Vectorized class", "ogr")
+            self.iface.messageBar().pushMessage("New vector : ", outShp, 3, duration=10)
