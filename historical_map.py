@@ -32,7 +32,9 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QDialog, QFileDialog, QMessageBox
 
 import HistoricalMap.function_historical_map as fhm
-
+# Initialize Qt resources from file resources.py
+# import resources
+# Import the code for the dialog
 # Initialize Qt resources from file resources.py
 # import resources
 # Import the code for the dialog

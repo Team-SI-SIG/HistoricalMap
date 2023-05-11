@@ -27,6 +27,7 @@ from __future__ import annotations
 from qgis.PyQt.QtWidgets import QDockWidget
 
 # import os
+# import os
 import HistoricalMap.resources
 from HistoricalMap.historical_map_dialog_base import Ui_HistoricalMap
 
