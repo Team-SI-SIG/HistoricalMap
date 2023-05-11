@@ -25,12 +25,12 @@ from __future__ import annotations
 
 import os.path
 
-import function_historical_map as fhm
+import .function_historical_map as fhm
 
 # Initialize Qt resources from file resources.py
 # import resources
 # Import the code for the dialog
-from historical_map_dialog import HistoricalMapDialog
+from .historical_map_dialog import HistoricalMapDialog
 from PyQt5 import QtGui
 from qgis.core import QgsMessageLog
 from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTranslator, qVersion

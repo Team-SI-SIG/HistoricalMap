@@ -29,8 +29,8 @@ import pickle
 import tempfile
 
 import accuracy_index as ai
-import function_dataraster as dataraster
-import gmm_ridge as gmmr
+import .function_dataraster as dataraster
+import .gmm_ridge as gmmr
 import scipy as sp
 from osgeo import gdal, ogr, osr
 from qgis.core import QgsMessageLog

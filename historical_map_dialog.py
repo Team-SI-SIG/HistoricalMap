@@ -26,7 +26,7 @@ from __future__ import annotations
 
 # import os
 import resources
-from historical_map_dialog_base import Ui_HistoricalMap
+from .historical_map_dialog_base import Ui_HistoricalMap
 from qgis.PyQt.QtWidgets import QDockWidget
 
 # OLD Call for UI form
