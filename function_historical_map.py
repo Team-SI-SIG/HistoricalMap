@@ -28,9 +28,6 @@ import os
 import pickle
 import tempfile
 
-import accuracy_index as ai
-import function_dataraster as dataraster
-import gmm_ridge as gmmr
 import scipy as sp
 from osgeo import gdal, ogr, osr
 from qgis.core import QgsMessageLog
@@ -38,6 +35,10 @@ from qgis.PyQt import QtCore
 from qgis.PyQt.QtWidgets import QApplication, QProgressBar
 from qgis.utils import iface
 from scipy import ndimage
+
+import HistoricalMap.accuracy_index as ai
+import HistoricalMap.function_dataraster as dataraster
+import HistoricalMap.gmm_ridge as gmmr
 
 
 class historicalFilter:

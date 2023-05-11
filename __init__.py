@@ -33,6 +33,6 @@ def classFactory(iface: QgsInterface) -> HistoricalMap:
     :type iface: QgsInterface
     """
     #
-    from .historical_map import HistoricalMap
+    from HistoricalMap.historical_map import HistoricalMap
 
     return HistoricalMap(iface)

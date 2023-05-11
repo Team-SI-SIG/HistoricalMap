@@ -24,10 +24,11 @@
 
 from __future__ import annotations
 
-# import os
-import resources
-from historical_map_dialog_base import Ui_HistoricalMap
 from qgis.PyQt.QtWidgets import QDockWidget
+
+# import os
+import HistoricalMap.resources
+from HistoricalMap.historical_map_dialog_base import Ui_HistoricalMap
 
 # OLD Call for UI form
 # FORM_CLASS, _ = uic.loadUiType(os.path.join(

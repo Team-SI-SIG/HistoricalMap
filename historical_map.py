@@ -25,17 +25,18 @@ from __future__ import annotations
 
 import os.path
 
-import function_historical_map as fhm
-
-# Initialize Qt resources from file resources.py
-# import resources
-# Import the code for the dialog
-from historical_map_dialog import HistoricalMapDialog
 from PyQt5 import QtGui
 from qgis.core import QgsMessageLog
 from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTranslator, qVersion
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QDialog, QFileDialog, QMessageBox
+
+import HistoricalMap.function_historical_map as fhm
+
+# Initialize Qt resources from file resources.py
+# import resources
+# Import the code for the dialog
+from HistoricalMap.historical_map_dialog import HistoricalMapDialog
 
 
 class HistoricalMap(QDialog):
@@ -56,7 +57,6 @@ class HistoricalMap(QDialog):
         """
         """  # Save reference to the QGIS interface
         self.iface = iface
-        legendInterface = self.iface.legendInterface()
 
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
@@ -218,7 +218,8 @@ class HistoricalMap(QDialog):
         action.setEnabled(enabled_flag)
 
         if status_tip is not None:
-            afilenamection.setStatusTip(status_tip)
+            # afilenamection.setStatusTip(status_tip)
+            pass
 
         if whats_this is not None:
             action.setWhatsThis(whats_this)
