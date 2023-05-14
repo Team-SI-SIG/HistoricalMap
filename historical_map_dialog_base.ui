@@ -436,9 +436,6 @@
        <pointsize>12</pointsize>
       </font>
      </property>
-     <property name="filters">
-      <set>QgsMapLayerProxyModel::PluginLayer|QgsMapLayerProxyModel::RasterLayer</set>
-     </property>
     </widget>
     <widget class="QLabel" name="tiffImageLabel_3">
      <property name="geometry">
@@ -760,9 +757,6 @@
        <pointsize>12</pointsize>
       </font>
      </property>
-     <property name="filters">
-      <set>QgsMapLayerProxyModel::PluginLayer|QgsMapLayerProxyModel::RasterLayer</set>
-     </property>
     </widget>
     <widget class="QLabel" name="label_5">
      <property name="geometry">
@@ -899,9 +893,6 @@ SVM : Support Vector Machine</string>
        <family>Arial</family>
        <pointsize>12</pointsize>
       </font>
-     </property>
-     <property name="filters">
-      <set>QgsMapLayerProxyModel::HasGeometry|QgsMapLayerProxyModel::LineLayer|QgsMapLayerProxyModel::NoGeometry|QgsMapLayerProxyModel::PluginLayer|QgsMapLayerProxyModel::PointLayer|QgsMapLayerProxyModel::PolygonLayer|QgsMapLayerProxyModel::VectorLayer</set>
      </property>
     </widget>
     <widget class="QWidget" name="widget_2" native="true">
@@ -1189,13 +1180,8 @@ For example 0,5 means that we use 50% of your parcel for making the model.</stri
        <pointsize>12</pointsize>
       </font>
      </property>
-<<<<<<< Updated upstream
-     <property name="filters">
-      <set>QgsMapLayerProxyModel::PluginLayer|QgsMapLayerProxyModel::RasterLayer</set>
-=======
      <property name="storageMode">
       <enum>QgsFileWidget::SaveFile</enum>
->>>>>>> Stashed changes
      </property>
     </widget>
     <widget class="QgsFileWidget" name="outMatrix">

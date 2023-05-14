@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#! /usr/bin/python3
+
 """!@brief Call of UI form
 /***************************************************************************
  HistoricalMapDialog
@@ -20,15 +21,20 @@
  *                                                                         *
  ***************************************************************************/
 """
+
+from __future__ import annotations
+
+from qgis.PyQt.QtWidgets import QDockWidget
+
 # import os
-import resources
-from PyQt4.QtGui import QMainWindow, QMessageBox, QListWidgetItem, QFileDialog, QDockWidget
+# import os
+import HistoricalMap.resources
+from HistoricalMap.historical_map_dialog_base import Ui_HistoricalMap
 
 # OLD Call for UI form
-#FORM_CLASS, _ = uic.loadUiType(os.path.join(
+# FORM_CLASS, _ = uic.loadUiType(os.path.join(
 #    os.path.dirname(__file__), 'historical_map_dialog_base.ui'))
 
-from historical_map_dialog_base import Ui_HistoricalMap
 
 # OLD Call for UI ext
 # class HistoricalMapDialog(QtGui.QDialog, FORM_CLASS):
