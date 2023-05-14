@@ -24,7 +24,18 @@ from PyQt4 import QtGui
 from PyQt4.QtGui import QAction, QIcon, QFileDialog, QDialog
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 import os.path
+<<<<<<< Updated upstream
 import function_historical_map as fhm
+=======
+
+from qgis.core import QgsMessageLog
+from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTranslator, qVersion
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QDialog, QMessageBox
+
+import HistoricalMap.function_historical_map as fhm
+
+>>>>>>> Stashed changes
 # Initialize Qt resources from file resources.py
 #import resources
 # Import the code for the dialog
@@ -81,6 +92,7 @@ class HistoricalMap( QDialog ):
         
         
         ## Init to choose file (to load or to save)
+<<<<<<< Updated upstream
         self.dlg.outRaster.clear()
         self.dlg.selectRaster.clicked.connect(self.select_output_file)
         self.dlg.outModel.clear()
@@ -96,6 +108,17 @@ class HistoricalMap( QDialog ):
         self.dlg.outShp.clear()
         self.dlg.selectOutShp.clicked.connect(self.select_output_file)
         
+=======
+        self.dlg.outRaster.setFilePath("")
+        self.dlg.outModel.setFilePath("")
+        self.dlg.outMatrix.setFilePath("")
+
+        self.dlg.btnFilter.clicked.connect(self.runFilter)
+        self.dlg.btnTrain.clicked.connect(self.runTrain)
+        self.dlg.btnClassify.clicked.connect(self.runClassify)
+        self.dlg.inModel.setFilePath("")
+        self.dlg.outShp.setFilePath("")
+>>>>>>> Stashed changes
 
         ## init fields   
 
@@ -249,6 +272,7 @@ class HistoricalMap( QDialog ):
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
+<<<<<<< Updated upstream
         
     def select_output_file(self):
         """!@brief Select file to save, and gives the right extension if the user don't put it"""
@@ -290,6 +314,9 @@ class HistoricalMap( QDialog ):
             return
         if sender == self.dlg.selectModelStep3:
             self.dlg.inModel.setText(fileName)
+=======
+
+>>>>>>> Stashed changes
     def showDlg(self):
         self.dlg.show()
         
@@ -307,8 +334,13 @@ class HistoricalMap( QDialog ):
                 message = "You have to specify a tif in image to filter. You tried to had a "+rasterExt
              
         except:
+<<<<<<< Updated upstream
             message="Impossible to load raster"
         if self.dlg.outRaster.text()=='':
+=======
+            message = "Impossible to load raster"
+        if self.dlg.outRaster.filePath() == "":
+>>>>>>> Stashed changes
             message = "Sorry, you have to specify as output raster"
 
         if message!='':
@@ -322,11 +354,19 @@ class HistoricalMap( QDialog ):
                 # Get args
                 # inRaster=self.dlg.inRaster.currentLayer()
                 # inRaster=inRaster.dataProvider().dataSourceUri()
+<<<<<<< Updated upstream
                 inShapeGrey=self.dlg.inShapeGrey.value()
                 inShapeMedian=self.dlg.inShapeMedian.value()
                 outRaster=self.dlg.outRaster.text()
                 iterMedian=self.dlg.inShapeMedianIter.value()
                 
+=======
+                inShapeGrey = self.dlg.inShapeGrey.value()
+                inShapeMedian = self.dlg.inShapeMedian.value()
+                outRaster = self.dlg.outRaster.filePath()
+                iterMedian = self.dlg.inShapeMedianIter.value()
+
+>>>>>>> Stashed changes
                 # Do the job
                 
                 fhm.historicalFilter(inRaster,outRaster,inShapeGrey,inShapeMedian,iterMedian)
@@ -351,10 +391,17 @@ class HistoricalMap( QDialog ):
                 Open a popup to show where the matrix or the model is saved
         """
         # Validation
+<<<<<<< Updated upstream
         message=''
         if self.dlg.outModel.text()=='':
             message = "Sorry, you have to specify as model name"
         if self.dlg.outMatrix.text()=='':
+=======
+        message = ""
+        if self.dlg.outModel.filePath() == "":
+            message = "Sorry, you have to specify as model name"
+        if self.dlg.outMatrix.filePath() == "":
+>>>>>>> Stashed changes
             message = "Sorry, you have to specify as matrix name"
         if not self.dlg.inClassifier.currentText()=='GMM':
             try:
@@ -374,6 +421,7 @@ class HistoricalMap( QDialog ):
                 inTraining=self.dlg.inTraining.currentLayer()
                 
                 # Remove layerid=0 from SHP Path
+<<<<<<< Updated upstream
                 inTraining=inTraining.dataProvider().dataSourceUri().split('|')[0]
                 
                 
@@ -387,8 +435,20 @@ class HistoricalMap( QDialog ):
                 inSeed=int(inSeed)
                 inSplit=self.dlg.inSplit.value()
                 #nFolds=self.dlg.nFolds.value()
+=======
+                inTraining = inTraining.dataProvider().dataSourceUri().split("|")[0]
+                inClassifier = self.dlg.inClassifier.currentText()
+                outModel = self.dlg.outModel.filePath()
+                outMatrix = self.dlg.outMatrix.filePath()
+                # > Optional inField
+                inField = self.dlg.inField.currentText()
+                inSeed = self.dlg.inSeed.value()
+                inSeed = int(inSeed)
+                inSplit = self.dlg.inSplit.value()
+                # nFolds=self.dlg.nFolds.value()
+>>>>>>> Stashed changes
                 # add model to step 3
-                self.dlg.inModel.setText(outModel)
+                self.dlg.inModel.setFilePath(outModel)
                 # Do the job
                 fhm.learnModel(inFiltered,inTraining,inField,inSplit,inSeed,outModel,outMatrix,inClassifier)
                 
@@ -401,6 +461,7 @@ class HistoricalMap( QDialog ):
                 QtGui.QMessageBox.warning(self, 'Problem while training', 'Something went wrong, sorry. Please report this issue with four files and settings.', QtGui.QMessageBox.Ok)
 
 
+<<<<<<< Updated upstream
             
     def runClassify(self):
             """!@brief Performs the classification by calling function_historical_map.py
@@ -456,3 +517,48 @@ class HistoricalMap( QDialog ):
                 # Add layer
                 self.iface.addVectorLayer(outShp,'Vectorized class','ogr')
                 self.iface.messageBar().pushMessage("New vector : ",outShp, 3, duration=10)
+=======
+        First step is validating the form, then if all is ok, proceed to the classification.
+        """
+        message = ""
+        if self.dlg.inModel.filePath() == "":
+            message = "Sorry, you have to specify a model"
+        if self.dlg.outShp.filePath() == "":
+            message = "Sorry, you have to specify a vector field to save the results"
+        if not os.path.splitext(self.dlg.outShp.text())[1] == ".shp":
+            message = "Sorry, you have to specify a *.shp type in output"
+        if message != "":
+            QMessageBox.warning(
+                self, "Information missing or invalid", message, QMessageBox.Ok
+            )
+        else:
+            # Get filtered image
+            inFilteredStep3 = self.dlg.inFilteredStep3.currentLayer()
+            inFilteredStep3 = str(inFilteredStep3.dataProvider().dataSourceUri())
+            # Get model done at Step 2
+            inModel = str(self.dlg.inModel.filePath())
+            # Get min size for polygons
+            # Multipied by 10 000 to have figure in hectare
+            # Input of 0,6 (0,6 hectare) will be converted to 6000 m2
+            inMinSize = self.dlg.inMinSize.value()
+            outShp = str(self.dlg.outShp.filePath())
+            inClassForest = int(self.dlg.inClassForest.value())
+            # do the job
+            classify = fhm.classifyImage()
+            inMinSize = inMinSize * 10000  # convert ha to m squared
+            try:
+                temp = classify.initPredict(inFilteredStep3, inModel)
+            except:
+                QgsMessageLog.logMessage("Problem while predicting image")
+
+            if self.dlg.filterByPixel.isChecked():  # sieve by pixel number (raster)
+                temp = classify.postClassRaster(
+                    temp, int(inMinSize), inClassForest, outShp
+                )
+            else:  # sieve by area (vector)
+                temp = classify.postClassVector(temp, inMinSize, inClassForest, outShp)
+
+            # Add layer
+            self.iface.addVectorLayer(outShp, "Vectorized class", "ogr")
+            self.iface.messageBar().pushMessage("New vector : ", outShp, 3, duration=10)
+>>>>>>> Stashed changes
