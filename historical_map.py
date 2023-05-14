@@ -25,13 +25,13 @@ from __future__ import annotations
 
 import os.path
 
-from PyQt5 import QtGui
 from qgis.core import QgsMessageLog
 from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTranslator, qVersion
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QDialog, QFileDialog, QMessageBox
+from qgis.PyQt.QtWidgets import QAction, QDialog, QMessageBox
 
 import HistoricalMap.function_historical_map as fhm
+
 # Initialize Qt resources from file resources.py
 # import resources
 # Import the code for the dialog
@@ -85,20 +85,15 @@ class HistoricalMap(QDialog):
         self.toolbar.setObjectName("HistoricalMap")
 
         ## Init to choose file (to load or to save)
-        self.dlg.outRaster.clear()
-        self.dlg.selectRaster.clicked.connect(self.select_output_file)
-        self.dlg.outModel.clear()
-        self.dlg.selectModel.clicked.connect(self.select_output_file)
-        self.dlg.outMatrix.clear()
-        self.dlg.selectMatrix.clicked.connect(self.select_output_file)
+        self.dlg.outRaster.setFilePath("")
+        self.dlg.outModel.setFilePath("")
+        self.dlg.outMatrix.setFilePath("")
 
         self.dlg.btnFilter.clicked.connect(self.runFilter)
         self.dlg.btnTrain.clicked.connect(self.runTrain)
         self.dlg.btnClassify.clicked.connect(self.runClassify)
-        self.dlg.inModel.clear()
-        self.dlg.selectModelStep3.clicked.connect(self.select_load_file)
-        self.dlg.outShp.clear()
-        self.dlg.selectOutShp.clicked.connect(self.select_output_file)
+        self.dlg.inModel.setFilePath("")
+        self.dlg.outShp.setFilePath("")
 
         ## init fields
 
@@ -255,47 +250,6 @@ class HistoricalMap(QDialog):
         # remove the toolbar
         del self.toolbar
 
-    def select_output_file(self):
-        """!@brief Select file to save, and gives the right extension if the user don't put it"""
-        sender = self.sender()
-
-        fileName = QFileDialog.getSaveFileName(self.dlg, "Select output file")
-
-        if not fileName:
-            return
-
-        # If user give right file extension, we don't add it
-
-        fileName, fileExtension = os.path.splitext(fileName)
-        if sender == self.dlg.selectRaster:
-            if fileExtension != ".tif":
-                self.dlg.outRaster.setText(fileName + ".tif")
-            else:
-                self.dlg.outRaster.setText(fileName + fileExtension)
-        elif sender == self.dlg.selectModel:
-            self.dlg.outModel.setText(fileName + fileExtension)
-        elif sender == self.dlg.selectMatrix:
-            if fileExtension != ".csv":
-                self.dlg.outMatrix.setText(fileName + ".csv")
-            else:
-                self.dlg.outMatrix.setText(fileName + fileExtension)
-        elif sender == self.dlg.selectOutShp:
-            if fileExtension != ".shp":
-                self.dlg.outShp.setText(fileName + ".shp")
-            else:
-                self.dlg.outShp.setText(fileName + fileExtension)
-        elif sender == self.dlg.selectModelStep3:
-            self.dlg.inModel.setText(fileName)
-
-    def select_load_file(self):
-        """!@brief Select file to load in the field"""
-        sender = self.sender()
-        fileName = QFileDialog.getOpenFileName(self.dlg, "Select your file", "")
-        if not fileName:
-            return
-        if sender == self.dlg.selectModelStep3:
-            self.dlg.inModel.setText(fileName)
-
     def showDlg(self):
         self.dlg.show()
 
@@ -317,7 +271,7 @@ class HistoricalMap(QDialog):
 
         except:
             message = "Impossible to load raster"
-        if self.dlg.outRaster.text() == "":
+        if self.dlg.outRaster.filePath() == "":
             message = "Sorry, you have to specify as output raster"
 
         if message != "":
@@ -335,7 +289,7 @@ class HistoricalMap(QDialog):
                 # inRaster=inRaster.dataProvider().dataSourceUri()
                 inShapeGrey = self.dlg.inShapeGrey.value()
                 inShapeMedian = self.dlg.inShapeMedian.value()
-                outRaster = self.dlg.outRaster.text()
+                outRaster = self.dlg.outRaster.filePath()
                 iterMedian = self.dlg.inShapeMedianIter.value()
 
                 # Do the job
@@ -374,9 +328,9 @@ class HistoricalMap(QDialog):
         """
         # Validation
         message = ""
-        if self.dlg.outModel.text() == "":
+        if self.dlg.outModel.filePath() == "":
             message = "Sorry, you have to specify as model name"
-        if self.dlg.outMatrix.text() == "":
+        if self.dlg.outMatrix.filePath() == "":
             message = "Sorry, you have to specify as matrix name"
         if not self.dlg.inClassifier.currentText() == "GMM":
             try:
@@ -401,8 +355,8 @@ class HistoricalMap(QDialog):
                 # Remove layerid=0 from SHP Path
                 inTraining = inTraining.dataProvider().dataSourceUri().split("|")[0]
                 inClassifier = self.dlg.inClassifier.currentText()
-                outModel = self.dlg.outModel.text()
-                outMatrix = self.dlg.outMatrix.text()
+                outModel = self.dlg.outModel.filePath()
+                outMatrix = self.dlg.outMatrix.filePath()
                 # > Optional inField
                 inField = self.dlg.inField.currentText()
                 inSeed = self.dlg.inSeed.value()
@@ -410,7 +364,7 @@ class HistoricalMap(QDialog):
                 inSplit = self.dlg.inSplit.value()
                 # nFolds=self.dlg.nFolds.value()
                 # add model to step 3
-                self.dlg.inModel.setText(outModel)
+                self.dlg.inModel.setFilePath(outModel)
                 # Do the job
                 fhm.learnModel(
                     inFiltered,
@@ -451,9 +405,9 @@ class HistoricalMap(QDialog):
         First step is validating the form, then if all is ok, proceed to the classification.
         """
         message = ""
-        if self.dlg.inModel.text() == "":
+        if self.dlg.inModel.filePath() == "":
             message = "Sorry, you have to specify a model"
-        if self.dlg.outShp.text() == "":
+        if self.dlg.outShp.filePath() == "":
             message = "Sorry, you have to specify a vector field to save the results"
         if not os.path.splitext(self.dlg.outShp.text())[1] == ".shp":
             message = "Sorry, you have to specify a *.shp type in output"
@@ -466,12 +420,12 @@ class HistoricalMap(QDialog):
             inFilteredStep3 = self.dlg.inFilteredStep3.currentLayer()
             inFilteredStep3 = str(inFilteredStep3.dataProvider().dataSourceUri())
             # Get model done at Step 2
-            inModel = str(self.dlg.inModel.text())
+            inModel = str(self.dlg.inModel.filePath())
             # Get min size for polygons
             # Multipied by 10 000 to have figure in hectare
             # Input of 0,6 (0,6 hectare) will be converted to 6000 m2
             inMinSize = self.dlg.inMinSize.value()
-            outShp = str(self.dlg.outShp.text())
+            outShp = str(self.dlg.outShp.filePath())
             inClassForest = int(self.dlg.inClassForest.value())
             # do the job
             classify = fhm.classifyImage()

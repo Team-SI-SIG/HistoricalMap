@@ -251,71 +251,6 @@
       <string>Image to filter :</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="selectRaster">
-     <property name="geometry">
-      <rect>
-       <x>427</x>
-       <y>191</y>
-       <width>100</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>100</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>...</string>
-     </property>
-     <property name="autoDefault">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="outRaster">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>161</x>
-       <y>190</y>
-       <width>251</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial</family>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="placeholderText">
-      <string>ex : map_filtered.tiff</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="tiffImageLabel_13">
      <property name="geometry">
       <rect>
@@ -561,6 +496,62 @@
       <bool>false</bool>
      </property>
     </widget>
+    <widget class="QgsFileWidget" name="outRaster">
+     <property name="geometry">
+      <rect>
+       <x>161</x>
+       <y>190</y>
+       <width>284</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="filter">
+      <string>*.tif</string>
+     </property>
+     <property name="storageMode">
+      <enum>QgsFileWidget::SaveFile</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_22">
+     <property name="geometry">
+      <rect>
+       <x>460</x>
+       <y>190</y>
+       <width>30</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ex : map_filtered.tiff&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="resources.qrc">:/plugins/HistoricalMap/img/help/information.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
@@ -686,65 +677,6 @@
       </property>
      </item>
     </widget>
-    <widget class="QLineEdit" name="outModel">
-     <property name="geometry">
-      <rect>
-       <x>169</x>
-       <y>114</y>
-       <width>176</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial</family>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="placeholderText">
-      <string>ex : modelGMM</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="selectModel">
-     <property name="geometry">
-      <rect>
-       <x>351</x>
-       <y>114</y>
-       <width>140</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_6">
      <property name="geometry">
       <rect>
@@ -767,7 +699,7 @@
       </size>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This will output the training model you will need for the step 3.&lt;/p&gt;&lt;p&gt;No extension.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This will output the training model you will need for the step 3.&lt;/p&gt;&lt;p&gt;No extension.&lt;/p&gt;&lt;p&gt;ex : modelGMM&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string/>
@@ -901,37 +833,6 @@ SVM : Support Vector Machine</string>
       <string>Confusion matrix :</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="outMatrix">
-     <property name="geometry">
-      <rect>
-       <x>169</x>
-       <y>150</y>
-       <width>176</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial</family>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="placeholderText">
-      <string>ex : matrixGMM.csv</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_7">
      <property name="geometry">
       <rect>
@@ -954,7 +855,7 @@ SVM : Support Vector Machine</string>
       </size>
      </property>
      <property name="toolTip">
-      <string>It will output a confusion matrix in a CSV format.</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It will output a confusion matrix in a CSV format.&lt;/p&gt;&lt;p&gt;ex : matrixGMM.csv&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string/>
@@ -964,31 +865,6 @@ SVM : Support Vector Machine</string>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="selectMatrix">
-     <property name="geometry">
-      <rect>
-       <x>351</x>
-       <y>150</y>
-       <width>140</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>...</string>
      </property>
     </widget>
     <widget class="QgsMapLayerComboBox" name="inTraining">
@@ -1289,6 +1165,47 @@ For example 0,5 means that we use 50% of your parcel for making the model.</stri
       <number>3</number>
      </property>
     </widget>
+    <widget class="QgsFileWidget" name="outModel">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>114</y>
+       <width>321</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="storageMode">
+      <enum>QgsFileWidget::SaveFile</enum>
+     </property>
+    </widget>
+    <widget class="QgsFileWidget" name="outMatrix">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>150</y>
+       <width>321</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="filter">
+      <string>*.csv</string>
+     </property>
+     <property name="storageMode">
+      <enum>QgsFileWidget::SaveFile</enum>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tab_3">
     <attribute name="title">
@@ -1341,40 +1258,6 @@ For example 0,5 means that we use 50% of your parcel for making the model.</stri
       <string>Model name : </string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="inModel">
-     <property name="geometry">
-      <rect>
-       <x>142</x>
-       <y>47</y>
-       <width>251</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial</family>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="placeholderText">
-      <string>ex : modelGMM</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="tiffImageLabel_12">
      <property name="geometry">
       <rect>
@@ -1392,63 +1275,6 @@ For example 0,5 means that we use 50% of your parcel for making the model.</stri
      </property>
      <property name="text">
       <string>Filtered image :</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="selectModelStep3">
-     <property name="geometry">
-      <rect>
-       <x>401</x>
-       <y>46</y>
-       <width>85</width>
-       <height>27</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="outShp">
-     <property name="geometry">
-      <rect>
-       <x>142</x>
-       <y>85</y>
-       <width>251</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial</family>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="placeholderText">
-      <string>ex : Map_classified.shp</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="selectOutShp">
-     <property name="geometry">
-      <rect>
-       <x>401</x>
-       <y>84</y>
-       <width>85</width>
-       <height>27</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>...</string>
      </property>
     </widget>
     <widget class="QLabel" name="tiffImageLabel_11">
@@ -1746,6 +1572,112 @@ For example 0,5 means that we use 50% of your parcel for making the model.</stri
       </property>
      </widget>
     </widget>
+    <widget class="QgsFileWidget" name="inModel">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>47</y>
+       <width>341</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+    </widget>
+    <widget class="QgsFileWidget" name="outShp">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>85</y>
+       <width>341</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="filter">
+      <string>*.shp</string>
+     </property>
+     <property name="storageMode">
+      <enum>QgsFileWidget::SaveFile</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_20">
+     <property name="geometry">
+      <rect>
+       <x>490</x>
+       <y>47</y>
+       <width>30</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ex : modelGMM&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="resources.qrc">:/plugins/HistoricalMap/img/help/information.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_21">
+     <property name="geometry">
+      <rect>
+       <x>490</x>
+       <y>85</y>
+       <width>30</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ex : Map_classified.shp&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="resources.qrc">:/plugins/HistoricalMap/img/help/information.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QLabel" name="label_16">
@@ -1935,6 +1867,11 @@ For example 0,5 means that we use 50% of your parcel for making the model.</stri
  </widget>
  <customwidgets>
   <customwidget>
+   <class>QgsFileWidget</class>
+   <extends>QWidget</extends>
+   <header>qgsfilewidget.h</header>
+  </customwidget>
+  <customwidget>
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>
    <header>qgsmaplayercombobox.h</header>
@@ -1950,25 +1887,15 @@ For example 0,5 means that we use 50% of your parcel for making the model.</stri
   <tabstop>inShapeGrey</tabstop>
   <tabstop>inShapeMedian</tabstop>
   <tabstop>inShapeMedianIter</tabstop>
-  <tabstop>outRaster</tabstop>
-  <tabstop>selectRaster</tabstop>
   <tabstop>btnFilter</tabstop>
   <tabstop>inFiltered</tabstop>
   <tabstop>inTraining</tabstop>
   <tabstop>inClassifier</tabstop>
-  <tabstop>outModel</tabstop>
-  <tabstop>selectModel</tabstop>
-  <tabstop>outMatrix</tabstop>
-  <tabstop>selectMatrix</tabstop>
   <tabstop>inField</tabstop>
   <tabstop>inSeed</tabstop>
   <tabstop>inSplit</tabstop>
   <tabstop>btnTrain</tabstop>
   <tabstop>inFilteredStep3</tabstop>
-  <tabstop>inModel</tabstop>
-  <tabstop>selectModelStep3</tabstop>
-  <tabstop>outShp</tabstop>
-  <tabstop>selectOutShp</tabstop>
   <tabstop>filterByPixel</tabstop>
   <tabstop>filterByArea</tabstop>
   <tabstop>inClassForest</tabstop>
