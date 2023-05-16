@@ -30,7 +30,8 @@ import tempfile
 
 import scipy as sp
 from osgeo import gdal, ogr, osr
-from qgis.core import QgsMessageLog
+from qgis.core import Qgis, QgsMessageLog
+
 from qgis.PyQt import QtCore
 from qgis.PyQt.QtWidgets import QApplication, QProgressBar
 from qgis.utils import iface
@@ -756,7 +757,7 @@ class progressBar:
         self.prgBar = prgBar
         self.iface = iface
         widget.layout().addWidget(self.prgBar)
-        iface.messageBar().pushWidget(widget, iface.messageBar().WARNING)
+        iface.messageBar().pushWidget(widget, Qgis.Warning)
         QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # if Max 0 and value 0, no progressBar, only cursor loading
