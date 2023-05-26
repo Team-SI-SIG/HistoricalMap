@@ -259,18 +259,18 @@ class HistoricalMap(QDialog):
         First step is validating the form, then if all is ok, proceed to the filtering.
         """
         message = ""
-        try:
-            inRaster = self.dlg.inRaster.currentLayer()
-            inRaster = inRaster.dataProvider().dataSourceUri()
-            rasterName, rasterExt = os.path.splitext(inRaster)
-            if not rasterExt == ".tif" or rasterExt == ".tiff":
-                message = (
-                    "You have to specify a tif in image to filter. You tried to had a "
-                    + rasterExt
-                )
+        # try:
+        inRaster = self.dlg.inRaster.currentLayer()
+        inRaster = inRaster.dataProvider().dataSourceUri()
+        rasterName, rasterExt = os.path.splitext(inRaster)
+        if not rasterExt == ".tif" or rasterExt == ".tiff":
+            message = (
+                "You have to specify a tif in image to filter. You tried to had a "
+                + rasterExt
+            )
 
-        except:
-            message = "Impossible to load raster"
+        # except:
+        #     message = "Impossible to load raster"
         if self.dlg.outRaster.filePath() == "":
             message = "Sorry, you have to specify as output raster"
 
@@ -283,37 +283,37 @@ class HistoricalMap(QDialog):
             """
             PROCESS IF ALL OK
             """
-            try:
-                # Get args
-                # inRaster=self.dlg.inRaster.currentLayer()
-                # inRaster=inRaster.dataProvider().dataSourceUri()
-                inShapeGrey = self.dlg.inShapeGrey.value()
-                inShapeMedian = self.dlg.inShapeMedian.value()
-                outRaster = self.dlg.outRaster.filePath()
-                iterMedian = self.dlg.inShapeMedianIter.value()
+            # try:
+            # Get args
+            # inRaster=self.dlg.inRaster.currentLayer()
+            # inRaster=inRaster.dataProvider().dataSourceUri()
+            inShapeGrey = self.dlg.inShapeGrey.value()
+            inShapeMedian = self.dlg.inShapeMedian.value()
+            outRaster = self.dlg.outRaster.filePath()
+            iterMedian = self.dlg.inShapeMedianIter.value()
 
-                # Do the job
+            # Do the job
 
-                fhm.historicalFilter(
-                    inRaster, outRaster, inShapeGrey, inShapeMedian, iterMedian
-                )
+            fhm.historicalFilter(
+                inRaster, outRaster, inShapeGrey, inShapeMedian, iterMedian
+            )
 
-                # Show what's done
-                self.iface.messageBar().pushMessage(
-                    "New image",
-                    "Filter with "
-                    + str(inShapeGrey)
-                    + " closing size and "
-                    + str(inShapeMedian)
-                    + " median size",
-                    3,
-                    10,
-                )
-                self.iface.addRasterLayer(outRaster)
-            except:
-                QMessageBox.warning(
-                    self, "Problem while filtering", "Please show log", QMessageBox.Ok
-                )
+            # Show what's done
+            self.iface.messageBar().pushMessage(
+                "New image",
+                "Filter with "
+                + str(inShapeGrey)
+                + " closing size and "
+                + str(inShapeMedian)
+                + " median size",
+                3,
+                10,
+            )
+            self.iface.addRasterLayer(outRaster)
+            # except:
+            #     QMessageBox.warning(
+            #         self, "Problem while filtering", "Please show log", QMessageBox.Ok
+            #     )
 
     def runTrain(self):
         """!@brief Performs the training by calling function_historical_map.py
@@ -333,70 +333,70 @@ class HistoricalMap(QDialog):
         if self.dlg.outMatrix.filePath() == "":
             message = "Sorry, you have to specify as matrix name"
         if not self.dlg.inClassifier.currentText() == "GMM":
-            try:
-                import sklearn
-            except:
-                message = (
-                    "It seems you don't have Scitkit-Learn on your computer."
-                    " You can only use GMM classifier."
-                    " Please consult the documentation for more information"
-                )
+            # try:
+            import sklearn
+            # except:
+            #     message = (
+            #         "It seems you don't have Scitkit-Learn on your computer."
+            #         " You can only use GMM classifier."
+            #         " Please consult the documentation for more information"
+            #     )
 
         if message != "":
             QMessageBox.warning(
                 self, "Information missing or invalid", message, QMessageBox.Ok
             )
         else:
-            try:
-                # Getting variables from UI
-                inFiltered = self.dlg.inFiltered.currentLayer()
-                inFiltered = inFiltered.dataProvider().dataSourceUri()
-                inTraining = self.dlg.inTraining.currentLayer()
-                # Remove layerid=0 from SHP Path
-                inTraining = inTraining.dataProvider().dataSourceUri().split("|")[0]
-                inClassifier = self.dlg.inClassifier.currentText()
-                outModel = self.dlg.outModel.filePath()
-                outMatrix = self.dlg.outMatrix.filePath()
-                # > Optional inField
-                inField = self.dlg.inField.currentText()
-                inSeed = self.dlg.inSeed.value()
-                inSeed = int(inSeed)
-                inSplit = self.dlg.inSplit.value()
-                # nFolds=self.dlg.nFolds.value()
-                # add model to step 3
-                self.dlg.inModel.setFilePath(outModel)
-                # Do the job
-                fhm.learnModel(
-                    inFiltered,
-                    inTraining,
-                    inField,
-                    inSplit,
-                    inSeed,
-                    outModel,
-                    outMatrix,
-                    inClassifier,
-                )
+            # try:
+            # Getting variables from UI
+            inFiltered = self.dlg.inFiltered.currentLayer()
+            inFiltered = inFiltered.dataProvider().dataSourceUri()
+            inTraining = self.dlg.inTraining.currentLayer()
+            # Remove layerid=0 from SHP Path
+            inTraining = inTraining.dataProvider().dataSourceUri().split("|")[0]
+            inClassifier = self.dlg.inClassifier.currentText()
+            outModel = self.dlg.outModel.filePath()
+            outMatrix = self.dlg.outMatrix.filePath()
+            # > Optional inField
+            inField = self.dlg.inField.currentText()
+            inSeed = self.dlg.inSeed.value()
+            inSeed = int(inSeed)
+            inSplit = self.dlg.inSplit.value()
+            # nFolds=self.dlg.nFolds.value()
+            # add model to step 3
+            self.dlg.inModel.setFilePath(outModel)
+            # Do the job
+            fhm.learnModel(
+                inFiltered,
+                inTraining,
+                inField,
+                inSplit,
+                inSeed,
+                outModel,
+                outMatrix,
+                inClassifier,
+            )
 
-                # show where it is saved
-                if self.dlg.outMatrix.text() != "":
-                    QMessageBox.information(
-                        self,
-                        "Information",
-                        f"Training is done!<br>Confusion matrix saved at {outMatrix}.",
-                    )
-                else:
-                    QMessageBox.information(
-                        self,
-                        "Information",
-                        f"Model is done!<br>Model saved at {outModel}, and matrix at {outMatrix}.",
-                    )
-            except:
-                QMessageBox.warning(
+            # show where it is saved
+            if self.dlg.outMatrix.filePath() != "":
+                QMessageBox.information(
                     self,
-                    "Problem while training",
-                    "Something went wrong, sorry. Please report this issue with four files and settings.",
-                    QMessageBox.Ok,
+                    "Information",
+                    f"Training is done!<br>Confusion matrix saved at {outMatrix}.",
                 )
+            else:
+                QMessageBox.information(
+                    self,
+                    "Information",
+                    f"Model is done!<br>Model saved at {outModel}, and matrix at {outMatrix}.",
+                )
+            # except:
+            #     QMessageBox.warning(
+            #         self,
+            #         "Problem while training",
+            #         "Something went wrong, sorry. Please report this issue with four files and settings.",
+            #         QMessageBox.Ok,
+            #     )
 
     def runClassify(self):
         """!@brief Performs the classification by calling function_historical_map.py
@@ -409,7 +409,7 @@ class HistoricalMap(QDialog):
             message = "Sorry, you have to specify a model"
         if self.dlg.outShp.filePath() == "":
             message = "Sorry, you have to specify a vector field to save the results"
-        if not os.path.splitext(self.dlg.outShp.text())[1] == ".shp":
+        if not os.path.splitext(self.dlg.outShp.filePath())[1] == ".shp":
             message = "Sorry, you have to specify a *.shp type in output"
         if message != "":
             QMessageBox.warning(
@@ -430,10 +430,10 @@ class HistoricalMap(QDialog):
             # do the job
             classify = fhm.classifyImage()
             inMinSize = inMinSize * 10000  # convert ha to m squared
-            try:
-                temp = classify.initPredict(inFilteredStep3, inModel)
-            except:
-                QgsMessageLog.logMessage("Problem while predicting image")
+            # try:
+            temp = classify.initPredict(inFilteredStep3, inModel)
+            # except:
+            #     QgsMessageLog.logMessage("Problem while predicting image")
 
             if self.dlg.filterByPixel.isChecked():  # sieve by pixel number (raster)
                 temp = classify.postClassRaster(

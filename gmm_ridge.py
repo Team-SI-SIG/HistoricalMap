@@ -6,16 +6,16 @@ from __future__ import annotations
 
 import multiprocessing as mp
 
-import scipy as sp
-from scipy import linalg
+import numpy as np
+from numpy import linalg
 
 
 ## Temporary predict function
 def predict(tau, model, xT, yT):
-    err = sp.zeros(tau.size)
+    err = np.zeros(tau.size)
     for j, t in enumerate(tau):
         yp = model.predict(xT, tau=t)[0]
-        eq = sp.where(yp.ravel() == yT.ravel())[0]
+        eq = np.where(yp.ravel() == yT.ravel())[0]
         err[j] = eq.size * 100.0 / yT.size
     return err
 
@@ -37,8 +37,8 @@ class CV:
         Output: None
         """
         step = n // v  # Compute the number of samples in each fold
-        sp.random.seed(1)  # Set the random generator to the same initial state
-        t = sp.random.permutation(n)  # Generate random sampling of the indices
+        np.random.seed(1)  # Set the random generator to the same initial state
+        t = np.random.permutation(n)  # Generate random sampling of the indices
 
         indices = []
         for i in range(v - 1):  # group in v fold
@@ -46,12 +46,12 @@ class CV:
         indices.append(t[(v - 1) * step : n])
 
         for i in range(v):
-            self.iT.append(sp.asarray(indices[i]))
+            self.iT.append(np.asarray(indices[i]))
             l = range(v)
             l.remove(i)
-            temp = sp.empty(0, dtype=sp.int64)
+            temp = np.empty(0, dtype=np.int64)
             for j in l:
-                temp = sp.concatenate((temp, sp.asarray(indices[j])))
+                temp = np.concatenate((temp, np.asarray(indices[j])))
             self.it.append(temp)
 
     def split_data_class(self, y, v=5):
@@ -72,14 +72,14 @@ class CV:
             tempiT = []
             for i in range(C):
                 # Get all samples for each class
-                t = sp.where(y == (i + 1))[0]
+                t = np.where(y == (i + 1))[0]
                 nc = t.size
                 stepc = nc // v  # Step size for each class
                 if stepc == 0:
                     print(f"Not enough sample to build {v} folds in class {i}")
-                sp.random.seed(i)  # Set the random generator to the same initial state
+                np.random.seed(i)  # Set the random generator to the same initial state
                 tc = t[
-                    sp.random.permutation(nc)
+                    np.random.permutation(nc)
                 ]  # Random sampling of indices of samples for class i
 
                 # Set testing and training samples
@@ -87,7 +87,7 @@ class CV:
                     start, end = j * stepc, (j + 1) * stepc
                 else:
                     start, end = j * stepc, nc
-                tempiT.extend(sp.asarray(tc[start:end]))  # Testing
+                tempiT.extend(np.asarray(tc[start:end]))  # Testing
                 k = range(v)
                 k.remove(j)
                 for l in k:
@@ -95,7 +95,7 @@ class CV:
                         start, end = l * stepc, (l + 1) * stepc
                     else:
                         start, end = l * stepc, nc
-                    tempit.extend(sp.asarray(tc[start:end]))  # Training
+                    tempit.extend(np.asarray(tc[start:end]))  # Training
 
             self.it.append(tempit)
             self.iT.append(tempiT)
@@ -123,30 +123,30 @@ class GMMR:
         """
 
         ## Get information from the data
-        C = sp.unique(y).shape[0]
+        C = np.unique(y).shape[0]
         # C = int(y.max(0))  # Number of classes
         n = x.shape[0]  # Number of samples
         d = x.shape[1]  # Number of variables
-        eps = sp.finfo(sp.float64).eps
+        eps = np.finfo(np.float64).eps
 
         ## Initialization
-        self.ni = sp.empty((C, 1))  # Vector of number of samples for each class
-        self.prop = sp.empty((C, 1))  # Vector of proportion
-        self.mean = sp.empty((C, d))  # Vector of means
-        self.cov = sp.empty((C, d, d))  # Matrix of covariance
-        self.Q = sp.empty((C, d, d))  # Matrix of eigenvectors
-        self.L = sp.empty((C, d))  # Vector of eigenvalues
-        self.classnum = sp.empty(C).astype("uint8")
+        self.ni = np.empty((C, 1))  # Vector of number of samples for each class
+        self.prop = np.empty((C, 1))  # Vector of proportion
+        self.mean = np.empty((C, d))  # Vector of means
+        self.cov = np.empty((C, d, d))  # Matrix of covariance
+        self.Q = np.empty((C, d, d))  # Matrix of eigenvectors
+        self.L = np.empty((C, d))  # Vector of eigenvalues
+        self.classnum = np.empty(C).astype("uint8")
 
         ## Learn the parameter of the model for each class
-        for c, cR in enumerate(sp.unique(y)):
-            j = sp.where(y == (cR))[0]
+        for c, cR in enumerate(np.unique(y)):
+            j = np.where(y == (cR))[0]
 
             self.classnum[c] = cR  # Save the right label
             self.ni[c] = float(j.size)
             self.prop[c] = self.ni[c] / n
-            self.mean[c, :] = sp.mean(x[j, :], axis=0)
-            self.cov[c, :, :] = sp.cov(
+            self.mean[c, :] = np.mean(x[j, :], axis=0)
+            self.cov[c, :, :] = np.cov(
                 x[j, :], bias=1, rowvar=0
             )  # Normalize by ni to be consistent with the update formulae
 
@@ -170,7 +170,7 @@ class GMMR:
         C = self.ni.shape[0]  # Number of classes
 
         ## Initialization
-        K = sp.empty((nt, C))
+        K = np.empty((nt, C))
 
         if tau is None:
             TAU = self.tau
@@ -179,15 +179,15 @@ class GMMR:
 
         for c in range(C):
             invCov, logdet = self.compute_inverse_logdet(c, TAU)
-            cst = logdet - 2 * sp.log(self.prop[c])  # Pre compute the constant
+            cst = logdet - 2 * np.log(self.prop[c])  # Pre compute the constant
 
             xtc = xt - self.mean[c, :]
-            temp = sp.dot(invCov, xtc.T).T
-            K[:, c] = sp.sum(xtc * temp, axis=1) + cst
+            temp = np.dot(invCov, xtc.T).T
+            K[:, c] = np.sum(xtc * temp, axis=1) + cst
             del temp, xtc
 
         ## Assign the label save in classnum to the minimum value of K
-        yp = self.classnum[sp.argmin(K, 1)]
+        yp = self.classnum[np.argmin(K, 1)]
 
         ## Reassign label with real value
         if proba is None:
@@ -198,8 +198,8 @@ class GMMR:
     def compute_inverse_logdet(self, c, tau):
         Lr = self.L[c, :] + tau  # Regularized eigenvalues
         temp = self.Q[c, :, :] * (1 / Lr)
-        invCov = sp.dot(temp, self.Q[c, :, :].T)  # Pre compute the inverse
-        logdet = sp.sum(sp.log(Lr))  # Compute the log determinant
+        invCov = np.dot(temp, self.Q[c, :, :].T)  # Pre compute the inverse
+        logdet = np.sum(np.log(Lr))  # Compute the log determinant
         return invCov, logdet
 
     def BIC(self, x, y, tau=None):
@@ -216,19 +216,19 @@ class GMMR:
 
         ## Penalization
         P = C * (d * (d + 3) / 2) + (C - 1)
-        P *= sp.log(n)
+        P *= np.log(n)
 
         ## Compute the log-likelihood
         L = 0
         for c in range(C):
-            j = sp.where(y == (c + 1))[0]
+            j = np.where(y == (c + 1))[0]
             xi = x[j, :]
             invCov, logdet = self.compute_inverse_logdet(c, TAU)
-            cst = logdet - 2 * sp.log(self.prop[c])  # Pre compute the constant
+            cst = logdet - 2 * np.log(self.prop[c])  # Pre compute the constant
             xi -= self.mean[c, :]
-            temp = sp.dot(invCov, xi.T).T
-            K = sp.sum(xi * temp, axis=1) + cst
-            L += sp.sum(K)
+            temp = np.dot(invCov, xi.T).T
+            K = np.sum(xi * temp, axis=1) + cst
+            L += np.sum(K)
             del K, xi
 
         return L + P
@@ -249,7 +249,7 @@ class GMMR:
         np = tau.size  # Number of parameters to test
         cv = CV()  # Initialization of the indices for the cross validation
         cv.split_data_class(y)
-        err = sp.zeros(np)  # Initialization of the errors
+        err = np.zeros(np)  # Initialization of the errors
 
         ## Create GMM model for each fold
         model_cv = []

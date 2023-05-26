@@ -28,7 +28,7 @@ import os
 import pickle
 import tempfile
 
-import scipy as sp
+import numpy as np
 from osgeo import gdal, ogr, osr
 from qgis.core import Qgis, QgsMessageLog
 
@@ -59,10 +59,10 @@ class historicalFilter:
 
     def __init__(self, inImage, outName, inShapeGrey, inShapeMedian, iterMedian):
         # open data with Gdal
-        try:
-            data, im = dataraster.open_data_band(inImage)
-        except:
-            print("Cannot open image")
+        # try:
+        data, im = dataraster.open_data_band(inImage)
+        # except:
+        #     print("Cannot open image")
 
         # get proj,geo and dimension (d) from data
         proj = data.GetProjection()
@@ -71,63 +71,62 @@ class historicalFilter:
 
         # Progress Bar
         maxStep = d + d * iterMedian
-        try:
-            filterProgress = progressBar(" Filtering...", maxStep)
-        except:
-            print("Failed loading progress Bar")
+        # try:
+        filterProgress = progressBar(" Filtering...", maxStep)
+        # except:
+        #     print("Failed loading progress Bar")
 
         # Try all, if error close filterProgress
-        try:
-            # create empty geotiff with d dimension, geotransform & projection
+        # try:
+        # create empty geotiff with d dimension, geotransform & projection
 
-            try:
-                outFile = dataraster.create_empty_tiff(outName, im, d, geo, proj)
-            except:
-                print(f"Cannot write empty image {outName}")
+        # try:
+        outFile = dataraster.create_empty_tiff(outName, im, d, geo, proj)
+        # except:
+        #     print(f"Cannot write empty image {outName}")
 
-            # fill outFile with filtered band
-            for i in range(d):
-                # Read data from the right band
-                try:
-                    filterProgress.addStep()
-                    temp = data.GetRasterBand(i + 1).ReadAsArray()
+        # fill outFile with filtered band
+        for i in range(d):
+            # Read data from the right band
+            # try:
+            filterProgress.addStep()
+            temp = data.GetRasterBand(i + 1).ReadAsArray()
+            # except:
+            #     print(f"Cannot get rasterband{i}")
+            #     QgsMessageLog.logMessage(
+            #         "Problem reading band " + str(i) + " from image " + inImage
+            #     )
+            # Filter with greyclosing, then with median filter
+            # try:
+            temp = ndimage.morphology.grey_closing(
+                temp, size=(inShapeGrey, inShapeGrey)
+            )
+            # except:
+            #     print("Cannot filter with Grey_Closing")
+            #     QgsMessageLog.logMessage("Problem with Grey Closing")
 
-                except:
-                    print(f"Cannot get rasterband{i}")
-                    QgsMessageLog.logMessage(
-                        "Problem reading band " + str(i) + " from image " + inImage
-                    )
-                # Filter with greyclosing, then with median filter
-                try:
-                    temp = ndimage.morphology.grey_closing(
-                        temp, size=(inShapeGrey, inShapeGrey)
-                    )
-                except:
-                    print("Cannot filter with Grey_Closing")
-                    QgsMessageLog.logMessage("Problem with Grey Closing")
+            for j in range(iterMedian):
+                # try:
+                filterProgress.addStep()
+                temp = ndimage.filters.median_filter(
+                    temp, size=(inShapeMedian, inShapeMedian)
+                )
+                # except:
+                #     print("Cannot filter with Median")
+                #     QgsMessageLog.logMessage("Problem with median filter")
 
-                for j in range(iterMedian):
-                    try:
-                        filterProgress.addStep()
-                        temp = ndimage.filters.median_filter(
-                            temp, size=(inShapeMedian, inShapeMedian)
-                        )
-                    except:
-                        print("Cannot filter with Median")
-                        QgsMessageLog.logMessage("Problem with median filter")
+            # Save bandand outFile
+            # try:
+            out = outFile.GetRasterBand(i + 1)
+            out.WriteArray(temp)
+            out.FlushCache()
+            temp = None
+            # except:
+            #     QgsMessageLog.logMessage(f"Cannot save band{i} on image {outName}")
 
-                # Save bandand outFile
-                try:
-                    out = outFile.GetRasterBand(i + 1)
-                    out.WriteArray(temp)
-                    out.FlushCache()
-                    temp = None
-                except:
-                    QgsMessageLog.logMessage(f"Cannot save band{i} on image {outName}")
-
-            filterProgress.reset()
-        except:
-            filterProgress.reset()
+        filterProgress.reset()
+        # except:
+        #     filterProgress.reset()
 
 
 class learnModel:
@@ -162,181 +161,181 @@ class learnModel:
         learningProgress = progressBar("Learning model...", 6)
 
         # Convert vector to raster
-        try:
-            try:
-                temp_folder = tempfile.mkdtemp()
-                filename = os.path.join(temp_folder, "temp.tif")
+        # try:
+        # try:
+        temp_folder = tempfile.mkdtemp()
+        filename = os.path.join(temp_folder, "temp.tif")
 
-                data = gdal.Open(inRaster, gdal.GA_ReadOnly)
-                shp = ogr.Open(inVector)
+        data = gdal.Open(inRaster, gdal.GA_ReadOnly)
+        shp = ogr.Open(inVector)
 
-                lyr = shp.GetLayer()
-            except:
-                QgsMessageLog.logMessage(
-                    "Problem with making tempfile or opening raster or vector"
-                )
+        lyr = shp.GetLayer()
+        # except:
+        #     QgsMessageLog.logMessage(
+        #         "Problem with making tempfile or opening raster or vector"
+        #     )
 
-            # Create temporary data set
-            try:
-                driver = gdal.GetDriverByName("GTiff")
-                dst_ds = driver.Create(
-                    filename, data.RasterXSize, data.RasterYSize, 1, gdal.GDT_Byte
-                )
-                dst_ds.SetGeoTransform(data.GetGeoTransform())
-                dst_ds.SetProjection(data.GetProjection())
-                OPTIONS = f"ATTRIBUTE={inField}"
-                gdal.RasterizeLayer(dst_ds, [1], lyr, None, options=[OPTIONS])
-                data, dst_ds, shp, lyr = None, None, None, None
-            except:
-                QgsMessageLog.logMessage("Cannot create temporary data set")
+        # Create temporary data set
+        # try:
+        driver = gdal.GetDriverByName("GTiff")
+        dst_ds = driver.Create(
+            filename, data.RasterXSize, data.RasterYSize, 1, gdal.GDT_Byte
+        )
+        dst_ds.SetGeoTransform(data.GetGeoTransform())
+        dst_ds.SetProjection(data.GetProjection())
+        OPTIONS = f"ATTRIBUTE={inField}"
+        gdal.RasterizeLayer(dst_ds, [1], lyr, None, options=[OPTIONS])
+        data, dst_ds, shp, lyr = None, None, None, None
+        # except:
+        #     QgsMessageLog.logMessage("Cannot create temporary data set")
 
-            # Load Training set
-            try:
-                X, Y = dataraster.get_samples_from_roi(inRaster, filename)
-            except:
-                QgsMessageLog.logMessage(
-                    f"Problem while getting samples from ROI with {inRaster}"
-                )
+        # Load Training set
+        # try:
+        X, Y = dataraster.get_samples_from_roi(inRaster, filename)
+        # except:
+        #     QgsMessageLog.logMessage(
+        #         f"Problem while getting samples from ROI with {inRaster}"
+        #     )
 
-            [n, d] = X.shape
-            C = int(Y.max())
-            SPLIT = inSplit
-            os.remove(filename)
-            os.rmdir(temp_folder)
+        [n, d] = X.shape
+        C = int(Y.max())
+        SPLIT = inSplit
+        os.remove(filename)
+        os.rmdir(temp_folder)
 
-            # Scale the data
-            X, M, m = self.scale(X)
+        # Scale the data
+        X, M, m = self.scale(X)
 
-            learningProgress.addStep()  # Add Step to ProgressBar
+        learningProgress.addStep()  # Add Step to ProgressBar
 
-            # Learning process take split of groundthruth pixels for training and the remaining for testing
-            try:
-                if SPLIT < 1:
-                    # progressBar, set Max to C
+        # Learning process take split of groundthruth pixels for training and the remaining for testing
+        # try:
+        if SPLIT < 1:
+            # progressBar, set Max to C
 
-                    # Random selection of the sample
-                    x = sp.array([]).reshape(0, d)
-                    y = sp.array([]).reshape(0, 1)
-                    xt = sp.array([]).reshape(0, d)
-                    yt = sp.array([]).reshape(0, 1)
+            # Random selection of the sample
+            x = np.array([]).reshape(0, d)
+            y = np.array([]).reshape(0, 1)
+            xt = np.array([]).reshape(0, d)
+            yt = np.array([]).reshape(0, 1)
 
-                    sp.random.seed(inSeed)  # Set the random generator state
-                    for i in range(C):
-                        t = sp.where((i + 1) == Y)[0]
-                        nc = t.size
-                        ns = int(nc * SPLIT)
-                        rp = sp.random.permutation(nc)
-                        x = sp.concatenate((X[t[rp[0:ns]], :], x))
-                        xt = sp.concatenate((X[t[rp[ns:]], :], xt))
-                        y = sp.concatenate((Y[t[rp[0:ns]]], y))
-                        yt = sp.concatenate((Y[t[rp[ns:]]], yt))
-                        # Add Pb
-            except:
-                QgsMessageLog.logMessage("Problem while learning if SPLIT <1")
+            np.random.seed(inSeed)  # Set the random generator state
+            for i in range(C):
+                t = np.where((i + 1) == Y)[0]
+                nc = t.size
+                ns = int(nc * SPLIT)
+                rp = np.random.permutation(nc)
+                x = np.concatenate((X[t[rp[0:ns]], :], x))
+                xt = np.concatenate((X[t[rp[ns:]], :], xt))
+                y = np.concatenate((Y[t[rp[0:ns]]], y))
+                yt = np.concatenate((Y[t[rp[ns:]]], yt))
+                # Add Pb
+        # except:
+        #     QgsMessageLog.logMessage("Problem while learning if SPLIT <1")
 
+        else:
+            x, y = X, Y
+
+        learningProgress.addStep()  # Add Step to ProgressBar
+        # Train Classifier
+        # try:
+        if inClassifier == "GMM":
+            # tau=10.0**sp.arange(-8,8,0.5)
+            model = gmmr.GMMR()
+            model.learn(x, y)
+            # htau,err = model.cross_validation(x,y,tau)
+            # model.tau = htau
+        # except:
+        #     QgsMessageLog.logMessage("Cannot train with GMMM")
+        else:
+            # try:
+            from sklearn import neighbors
+            from sklearn.model_selection import StratifiedKFold
+            from sklearn.ensemble import RandomForestClassifier
+            from sklearn.model_selection import GridSearchCV
+            from sklearn.svm import SVC
+            # except:
+            #     QgsMessageLog.logMessage(
+            #         "You must have sklearn dependencies on your computer. Please consult the documentation"
+            #     )
+            # try:
+            # AS Qgis in Windows doensn't manage multiprocessing, force to use 1 thread for not linux system
+            if os.name == "posix":
+                n_jobs = -1
             else:
-                x, y = X, Y
+                n_jobs = 1
+            #
+            if inClassifier == "RF":
+                param_grid_rf = dict(
+                    n_estimators=3 ** np.arange(1, 5),
+                    max_features=np.arange(1, 4),
+                )
+                y.shape = (y.size,)
+                cv = StratifiedKFold(n_splits=3)
+                grid = GridSearchCV(
+                    RandomForestClassifier(),
+                    param_grid=param_grid_rf,
+                    cv=cv.get_n_splits(y),
+                    n_jobs=n_jobs,
+                )
+                grid.fit(x, y)
+                model = grid.best_estimator_
+                model.fit(x, y)
+            elif inClassifier == "SVM":
+                param_grid_svm = dict(
+                    gamma=2.0 ** np.arange(-4, 4), C=10.0 ** np.arange(-2, 5)
+                )
+                y.shape = (y.size,)
+                cv = StratifiedKFold(n_splits=5)
+                grid = GridSearchCV(
+                    SVC(), param_grid=param_grid_svm, cv=cv.get_n_splits(y), n_jobs=n_jobs
+                )
+                grid.fit(x, y)
+                model = grid.best_estimator_
+                model.fit(x, y)
+            elif inClassifier == "KNN":
+                param_grid_knn = dict(n_neighbors=np.arange(1, 20, 4))
+                y.shape = (y.size,)
+                cv = StratifiedKFold(n_splits=3)
+                grid = GridSearchCV(
+                    neighbors.KNeighborsClassifier(),
+                    param_grid=param_grid_knn,
+                    cv=cv.get_n_splits(y),
+                    n_jobs=n_jobs,
+                )
+                grid.fit(x, y)
+                model = grid.best_estimator_
+                model.fit(x, y)
+            # except:
+            #     print(f"Cannot train with Classifier {inClassifier}")
+            #     QgsMessageLog.logMessage(
+            #         f"Cannot train with Classifier {inClassifier}"
+            #     )
 
-            learningProgress.addStep()  # Add Step to ProgressBar
-            # Train Classifier
-            try:
-                if inClassifier == "GMM":
-                    # tau=10.0**sp.arange(-8,8,0.5)
-                    model = gmmr.GMMR()
-                    model.learn(x, y)
-                    # htau,err = model.cross_validation(x,y,tau)
-                    # model.tau = htau
-            except:
-                QgsMessageLog.logMessage("Cannot train with GMMM")
-            else:
-                try:
-                    from sklearn import neighbors
-                    from sklearn.cross_validation import StratifiedKFold
-                    from sklearn.ensemble import RandomForestClassifier
-                    from sklearn.grid_search import GridSearchCV
-                    from sklearn.svm import SVC
-                except:
-                    QgsMessageLog.logMessage(
-                        "You must have sklearn dependencies on your computer. Please consult the documentation"
-                    )
-                try:
-                    # AS Qgis in Windows doensn't manage multiprocessing, force to use 1 thread for not linux system
-                    if os.name == "posix":
-                        n_jobs = -1
-                    else:
-                        n_jobs = 1
-                    #
-                    if inClassifier == "RF":
-                        param_grid_rf = dict(
-                            n_estimators=3 ** sp.arange(1, 5),
-                            max_features=sp.arange(1, 4),
-                        )
-                        y.shape = (y.size,)
-                        cv = StratifiedKFold(y, n_folds=3)
-                        grid = GridSearchCV(
-                            RandomForestClassifier(),
-                            param_grid=param_grid_rf,
-                            cv=cv,
-                            n_jobs=n_jobs,
-                        )
-                        grid.fit(x, y)
-                        model = grid.best_estimator_
-                        model.fit(x, y)
-                    elif inClassifier == "SVM":
-                        param_grid_svm = dict(
-                            gamma=2.0 ** sp.arange(-4, 4), C=10.0 ** sp.arange(-2, 5)
-                        )
-                        y.shape = (y.size,)
-                        cv = StratifiedKFold(y, n_folds=5)
-                        grid = GridSearchCV(
-                            SVC(), param_grid=param_grid_svm, cv=cv, n_jobs=n_jobs
-                        )
-                        grid.fit(x, y)
-                        model = grid.best_estimator_
-                        model.fit(x, y)
-                    elif inClassifier == "KNN":
-                        param_grid_knn = dict(n_neighbors=sp.arange(1, 20, 4))
-                        y.shape = (y.size,)
-                        cv = StratifiedKFold(y, n_folds=3)
-                        grid = GridSearchCV(
-                            neighbors.KNeighborsClassifier(),
-                            param_grid=param_grid_knn,
-                            cv=cv,
-                            n_jobs=n_jobs,
-                        )
-                        grid.fit(x, y)
-                        model = grid.best_estimator_
-                        model.fit(x, y)
-                except:
-                    print(f"Cannot train with Classifier {inClassifier}")
-                    QgsMessageLog.logMessage(
-                        f"Cannot train with Classifier {inClassifier}"
-                    )
+        learningProgress.prgBar.setValue(5)  # Add Step to ProgressBar
+        # Assess the quality of the model
+        if SPLIT < 1:
+            # if  inClassifier == 'GMM':
+            #     yp = model.predict(xt)[0]
+            # else:
+            yp = model.predict(xt)
+            CONF = ai.CONFUSION_MATRIX()
+            CONF.compute_confusion_matrix(yp, yt)
+            np.savetxt(outMatrix, CONF.confusion_matrix, delimiter=",", fmt="%1.4d")
 
-            learningProgress.prgBar.setValue(5)  # Add Step to ProgressBar
-            # Assess the quality of the model
-            if SPLIT < 1:
-                # if  inClassifier == 'GMM':
-                #     yp = model.predict(xt)[0]
-                # else:
-                yp = model.predict(xt)
-                CONF = ai.CONFUSION_MATRIX()
-                CONF.compute_confusion_matrix(yp, yt)
-                sp.savetxt(outMatrix, CONF.confusion_matrix, delimiter=",", fmt="%1.4d")
+        # Save Tree model
+        if outModel is not None:
+            output = open(outModel, "wb")
+            pickle.dump([model, M, m], output)
+            output.close()
 
-            # Save Tree model
-            if outModel is not None:
-                output = open(outModel, "wb")
-                pickle.dump([model, M, m], output)
-                output.close()
+        learningProgress.addStep()  # Add Step to ProgressBar
 
-            learningProgress.addStep()  # Add Step to ProgressBar
-
-            # Close progressBar
-            learningProgress.reset()
-            learningProgress = None
-        except:
-            learningProgress.reset()
+        # Close progressBar
+        learningProgress.reset()
+        learningProgress = None
+        # except:
+        #     learningProgress.reset()
 
     def scale(self, x, M=None, m=None):
         """!@brief Function that standardize the data.
@@ -351,14 +350,14 @@ class learnModel:
             m: the Min vector
         """
         [n, d] = x.shape
-        if not sp.issubdtype(x.dtype, float):
+        if not np.issubdtype(x.dtype, float):
             x = x.astype("float")
 
         # Initialization of the output
-        xs = sp.empty_like(x)
+        xs = np.empty_like(x)
 
         # get the parameters of the scaling
-        M, m = sp.amax(x, axis=0), sp.amin(x, axis=0)
+        M, m = np.amax(x, axis=0), np.amin(x, axis=0)
         den = M - m
         for i in range(d):
             if den[i] != 0:
@@ -392,33 +391,32 @@ class classifyImage:
     def initPredict(self, inRaster: str, inModel: str):
         # Load model
         self.Progress = progressBar(" Classification ", 3)
-        try:
-            model = open(inModel, "rb")  # TODO: Update to scale the data
-            if model is None:
-                print("Model not load")
-                QgsMessageLog.logMessage(f"Model : {inModel} is none")
-            else:
-                tree, M, m = pickle.load(model)
-                model.close()
-        except:
-            QgsMessageLog.logMessage(f"Error while loading the model : {inModel}")
+        # try:
+        model = open(inModel, "rb")  # TODO: Update to scale the data
+        if model is None:
+            print("Model not load")
+            QgsMessageLog.logMessage(f"Model : {inModel} is none")
+        else:
+            tree, M, m = pickle.load(model)
+            model.close()
+        # except:
+        #     QgsMessageLog.logMessage(f"Error while loading the model : {inModel}")
 
         # Creating temp file for saving raster classification
-        try:
-            temp_folder = tempfile.mkdtemp()
-            rasterTemp = os.path.join(temp_folder, "temp.tif")
-        except:
-            QgsMessageLog.logMessage(f"Cannot create temp file {rasterTemp}")
-            # Process the data
-        try:
-            predictedImage = self.predict_image(
-                inRaster, rasterTemp, tree, None, -10000, SCALE=[M, m]
-            )
-
-        except:
-            QgsMessageLog.logMessage(
-                f"Problem while predicting {inRaster} in temp {rasterTemp}"
-            )
+        # try:
+        temp_folder = tempfile.mkdtemp()
+        rasterTemp = os.path.join(temp_folder, "temp.tif")
+        # except:
+        #     QgsMessageLog.logMessage(f"Cannot create temp file {rasterTemp}")
+        #     # Process the data
+        # try:
+        predictedImage = self.predict_image(
+            inRaster, rasterTemp, tree, None, -10000, SCALE=[M, m]
+        )
+        # except:
+        #     QgsMessageLog.logMessage(
+        #         f"Problem while predicting {inRaster} in temp {rasterTemp}"
+        #     )
         self.Progress.addStep()
 
         return predictedImage
@@ -485,102 +483,102 @@ class classifyImage:
         self.Progress.addStep()
 
         # Vectorizing with gdal.Polygonize
-        try:
-            sourceRaster = gdal.Open(inRaster)
-            band = sourceRaster.GetRasterBand(1)
-            driver = ogr.GetDriverByName("ESRI Shapefile")
-            # If shapefile already exist, delete it
-            if os.path.exists(outShp):
-                driver.DeleteDataSource(outShp)
+        # try:
+        sourceRaster = gdal.Open(inRaster)
+        band = sourceRaster.GetRasterBand(1)
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+        # If shapefile already exist, delete it
+        if os.path.exists(outShp):
+            driver.DeleteDataSource(outShp)
 
-            outDatasource = driver.CreateDataSource(outShp)
-            # get proj from raster
-            srs = osr.SpatialReference()
-            srs.ImportFromWkt(sourceRaster.GetProjectionRef())
-            # create layer with proj
-            outLayer = outDatasource.CreateLayer(outShp, srs)
-            # Add class column (1,2...) to shapefile
+        outDatasource = driver.CreateDataSource(outShp)
+        # get proj from raster
+        srs = osr.SpatialReference()
+        srs.ImportFromWkt(sourceRaster.GetProjectionRef())
+        # create layer with proj
+        outLayer = outDatasource.CreateLayer(outShp, srs)
+        # Add class column (1,2...) to shapefile
 
-            newField = ogr.FieldDefn("Class", ogr.OFTInteger)
-            outLayer.CreateField(newField)
-            gdal.Polygonize(band, None, outLayer, 0, [], callback=None)
-            outDatasource.Destroy()
-            sourceRaster = None
-        except:
-            QgsMessageLog.logMessage(f"Cannot vectorize {inRaster}")
-            self.Progress.reset()
+        newField = ogr.FieldDefn("Class", ogr.OFTInteger)
+        outLayer.CreateField(newField)
+        gdal.Polygonize(band, None, outLayer, 0, [], callback=None)
+        outDatasource.Destroy()
+        sourceRaster = None
+        # except:
+        #     QgsMessageLog.logMessage(f"Cannot vectorize {inRaster}")
+        #     self.Progress.reset()
 
-        try:
-            # Add area for each feature
-            ioShpFile = ogr.Open(outShp, update=1)
-            lyr = ioShpFile.GetLayerByIndex(0)
-            lyr.ResetReading()
-            field_defn = ogr.FieldDefn("Area", ogr.OFTReal)
-            lyr.CreateField(field_defn)
+        # try:
+        # Add area for each feature
+        ioShpFile = ogr.Open(outShp, update=1)
+        lyr = ioShpFile.GetLayerByIndex(0)
+        lyr.ResetReading()
+        field_defn = ogr.FieldDefn("Area", ogr.OFTReal)
+        lyr.CreateField(field_defn)
 
-            for i in lyr:
-                # feat = lyr.GetFeature(i)
-                geom = i.GetGeometryRef()
-                area = round(geom.GetArea())
+        for i in lyr:
+            # feat = lyr.GetFeature(i)
+            geom = i.GetGeometryRef()
+            area = round(geom.GetArea())
 
-                lyr.SetFeature(i)
-                i.SetField("Area", area)
-                lyr.SetFeature(i)
-                # if area is less than inMinSize or if it isn't forest, remove polygon
-                if area < sieveSize or i.GetField("Class") != 1:
-                    lyr.DeleteFeature(i.GetFID())
-            ioShpFile.Destroy()
-        except:
-            QgsMessageLog.logMessage(
-                f"Cannot add area and remove it if size under {sieveSize}"
-            )
-            self.Progress.reset()
+            lyr.SetFeature(i)
+            i.SetField("Area", area)
+            lyr.SetFeature(i)
+            # if area is less than inMinSize or if it isn't forest, remove polygon
+            if area < sieveSize or i.GetField("Class") != 1:
+                lyr.DeleteFeature(i.GetFID())
+        ioShpFile.Destroy()
+        # except:
+        #     QgsMessageLog.logMessage(
+        #         f"Cannot add area and remove it if size under {sieveSize}"
+        #     )
+        #     self.Progress.reset()
         self.Progress.addStep()
         self.Progress.reset()
         return outShp
 
     def postClassRaster(self, inRaster, sieveSize, inClassNumber, outShp):
         """!@brief Sieve size with gdal.Sieve() fiunction, them reclass to delete unwanted labels"""
-        try:
-            rasterTemp = tempfile.mktemp(".tif")
-            datasrc = gdal.Open(inRaster)
-            srcband = datasrc.GetRasterBand(1)
-            data, im = dataraster.open_data_band(inRaster)
+        # try:
+        rasterTemp = tempfile.mktemp(".tif")
+        datasrc = gdal.Open(inRaster)
+        srcband = datasrc.GetRasterBand(1)
+        data, im = dataraster.open_data_band(inRaster)
 
-            drv = gdal.GetDriverByName("GTiff")
-            dst_ds = drv.Create(
-                rasterTemp, datasrc.RasterXSize, datasrc.RasterXSize, 1, gdal.GDT_Byte
-            )
+        drv = gdal.GetDriverByName("GTiff")
+        dst_ds = drv.Create(
+            rasterTemp, datasrc.RasterXSize, datasrc.RasterXSize, 1, gdal.GDT_Byte
+        )
 
-            dst_ds.SetGeoTransform(datasrc.GetGeoTransform())
-            dst_ds.SetProjection(datasrc.GetProjection())
+        dst_ds.SetGeoTransform(datasrc.GetGeoTransform())
+        dst_ds.SetProjection(datasrc.GetProjection())
 
-            dstband = dst_ds.GetRasterBand(1)
+        dstband = dst_ds.GetRasterBand(1)
 
-            def sieve(srcband, dstband, sieveSize):
-                gdal.SieveFilter(srcband, None, dstband, sieveSize, 8)
+        def sieve(srcband, dstband, sieveSize):
+            gdal.SieveFilter(srcband, None, dstband, sieveSize, 8)
 
-            pixelSize = datasrc.GetGeoTransform()[1]  # get pixel size
-            pixelSieve = int(
-                sieveSize / (pixelSize * pixelSize)
-            )  # get number of pixel to sieve
+        pixelSize = datasrc.GetGeoTransform()[1]  # get pixel size
+        pixelSieve = int(
+            sieveSize / (pixelSize * pixelSize)
+        )  # get number of pixel to sieve
 
-            sieve(srcband, dstband, pixelSieve)
+        sieve(srcband, dstband, pixelSieve)
 
-            dst_ds = None  # close destination band
+        dst_ds = None  # close destination band
 
-            self.Progress.addStep()
+        self.Progress.addStep()
 
-            rasterTemp = self.reclassAndFillHole(rasterTemp, inClassNumber)
+        rasterTemp = self.reclassAndFillHole(rasterTemp, inClassNumber)
 
-            self.Progress.addStep()
-        except:
-            QgsMessageLog.logMessage("Cannot sieve with raster function")
+        self.Progress.addStep()
+        # except:
+        #     QgsMessageLog.logMessage("Cannot sieve with raster function")
 
-        try:
-            outShp = self.polygonize(rasterTemp, outShp)  # vectorize raster
-        except:
-            self.Progress.reset()
+        # try:
+        outShp = self.polygonize(rasterTemp, outShp)  # vectorize raster
+        # except:
+        #     self.Progress.reset()
 
         self.Progress.addStep()
         self.Progress.reset()
@@ -599,15 +597,15 @@ class classifyImage:
             m: the Min vector
         """
         [n, d] = x.shape
-        if not sp.issubdtype(x.dtype, float):
+        if not np.issubdtype(x.dtype, float):
             x = x.astype("float")
 
         # Initialization of the output
-        xs = sp.empty_like(x)
+        xs = np.empty_like(x)
 
         # get the parameters of the scaling
         if M is None:
-            M, m = sp.amax(x, axis=0), sp.amin(x, axis=0)
+            M, m = np.amax(x, axis=0), np.amin(x, axis=0)
 
         den = M - m
         for i in range(d):
@@ -657,7 +655,7 @@ class classifyImage:
                 print("Image and mask should be of the same size")
                 exit()
         if SCALE is not None:
-            M, m = sp.asarray(SCALE[0]), sp.asarray(SCALE[1])
+            M, m = np.asarray(SCALE[0]), np.asarray(SCALE[1])
 
         # Get the size of the image
         d = raster.RasterCount
@@ -695,7 +693,7 @@ class classifyImage:
                     cols = nc - j
 
                 # Load the data and Do the prediction
-                X = sp.empty((cols * lines, d))
+                X = np.empty((cols * lines, d))
                 for ind in range(d):
                     X[:, ind] = (
                         raster.GetRasterBand(int(ind + 1))
@@ -710,16 +708,16 @@ class classifyImage:
                         .ReadAsArray(j, i, cols, lines)
                         .reshape(cols * lines)
                     )
-                    t = sp.where((mask_temp != 0) & (X[:, 0] != NODATA))[0]
-                    yp = sp.zeros((cols * lines,))
+                    t = np.where((mask_temp != 0) & (X[:, 0] != NODATA))[0]
+                    yp = np.zeros((cols * lines,))
                 else:
                     mask_temp = (
                         mask.GetRasterBand(1)
                         .ReadAsArray(j, i, cols, lines)
                         .reshape(cols * lines)
                     )
-                    t = sp.where((mask_temp != 0) & (X[:, 0] != NODATA))[0]
-                    yp = sp.zeros((cols * lines,))
+                    t = np.where((mask_temp != 0) & (X[:, 0] != NODATA))[0]
+                    yp = np.zeros((cols * lines,))
 
                 # TODO: Change this part accorindgly ...
                 if t.size > 0:

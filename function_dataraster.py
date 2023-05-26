@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-import scipy as sp
+import numpy as np
 from osgeo import gdal
 
 
@@ -54,7 +54,7 @@ def open_data_band(filename: str):
         exit()
 
     # Initialize the array
-    im = sp.empty((nl, nc), dtype=dt)
+    im = np.empty((nl, nc), dtype=dt)
     return data, im
 
 
@@ -175,8 +175,8 @@ def get_samples_from_roi(raster_name: str, roi_name):
     nl = raster.RasterYSize
 
     ## Read block data
-    X = sp.array([]).reshape(0, d)
-    Y = sp.array([]).reshape(0, 1)
+    X = np.array([]).reshape(0, d)
+    Y = np.array([]).reshape(0, 1)
     for i in range(0, nl, y_block_size):
         if i + y_block_size < nl:  # Check for size consistency in Y
             lines = y_block_size
@@ -192,22 +192,22 @@ def get_samples_from_roi(raster_name: str, roi_name):
 
             ROI = roi.GetRasterBand(1).ReadAsArray(j, i, cols, lines)
 
-            t = sp.nonzero(ROI)
+            t = np.nonzero(ROI)
 
             if t[0].size > 0:
-                Y = sp.concatenate(
+                Y = np.concatenate(
                     (Y, ROI[t].reshape((t[0].shape[0], 1)).astype("uint8"))
                 )
                 # Load the Variables
-                Xtp = sp.empty((t[0].shape[0], d))
+                Xtp = np.empty((t[0].shape[0], d))
                 for k in range(d):
                     band = raster.GetRasterBand(k + 1).ReadAsArray(j, i, cols, lines)
                     Xtp[:, k] = band[t]
-                try:
-                    X = sp.concatenate((X, Xtp))
-                except MemoryError:
-                    print("Impossible to allocate memory: ROI too big")
-                    exit()
+                # try:
+                X = np.concatenate((X, Xtp))
+                # except MemoryError:
+                #     print("Impossible to allocate memory: ROI too big")
+                #     exit()
 
     # Clean/Close variables
     del Xtp, band
@@ -299,7 +299,7 @@ def predict_image(raster_name: str, classif_name: str, classifier, mask_name=Non
             # Do the prediction
             if classifier["name"] == "NPFS":
                 # Load the data
-                X = sp.empty((cols * lines, nv))
+                X = np.empty((cols * lines, nv))
                 for ind, v in enumerate(ids):
                     X[:, ind] = (
                         raster.GetRasterBand(int(v + 1))
@@ -316,13 +316,13 @@ def predict_image(raster_name: str, classif_name: str, classifier, mask_name=Non
                         .ReadAsArray(j, i, cols, lines)
                         .reshape(cols * lines)
                     )
-                    t = sp.where(mask_temp != 0)[0]
-                    yp = sp.zeros((cols * lines,))
+                    t = np.where(mask_temp != 0)[0]
+                    yp = np.zeros((cols * lines,))
                     yp[t] = model.predict_gmm(X[t, :])[0].astype("uint16")
 
             elif classifier["name"] == "GMM":
                 # Load the data
-                X = sp.empty((cols * lines, d))
+                X = np.empty((cols * lines, d))
                 for ind in range(d):
                     X[:, ind] = (
                         raster.GetRasterBand(int(ind + 1))
@@ -339,8 +339,8 @@ def predict_image(raster_name: str, classif_name: str, classifier, mask_name=Non
                         .ReadAsArray(j, i, cols, lines)
                         .reshape(cols * lines)
                     )
-                    t = sp.where(mask_temp != 0)[0]
-                    yp = sp.zeros((cols * lines,))
+                    t = np.where(mask_temp != 0)[0]
+                    yp = np.zeros((cols * lines,))
                     yp[t] = model.predict_gmm(X[t, :])[0].astype("uint16")
 
             # Write the data
@@ -425,8 +425,8 @@ def smooth_image(raster_name, mask_name, output_name, l, t):
                 cols = nc - j
 
             # Get the data
-            X = sp.empty((cols * lines, d))
-            M = sp.empty((cols * lines, d), dtype="int")
+            X = np.empty((cols * lines, d))
+            M = np.empty((cols * lines, d), dtype="int")
             for ind in range(d):
                 X[:, ind] = (
                     raster.GetRasterBand(int(ind + 1))
@@ -442,7 +442,7 @@ def smooth_image(raster_name, mask_name, output_name, l, t):
             M[M > 0] = 1
 
             # Do the smoothing
-            Xf = sp.empty((cols * lines, d))
+            Xf = np.empty((cols * lines, d))
             for ind in range(
                 cols * lines
             ):  # This part can be speed up by doint it in parallel
